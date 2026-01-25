@@ -117,30 +117,34 @@ class File(db.Model):
             return True
 
         # ActivityPhoto에서 사용 확인
-        activity_photo = db.session.query(db.exists().where(
-            db.text(f"file_id = {self.id}")
-        )).scalar()
+        activity_photo = db.session.execute(
+            db.text("SELECT 1 FROM activity_photos WHERE file_id = :file_id LIMIT 1"),
+            {'file_id': self.id}
+        ).first()
         if activity_photo:
             return True
 
         # ActivityPost 썸네일 확인
-        activity_post = db.session.query(db.exists().where(
-            db.text(f"thumbnail_file_id = {self.id}")
-        )).scalar()
+        activity_post = db.session.execute(
+            db.text("SELECT 1 FROM activity_posts WHERE thumbnail_file_id = :file_id LIMIT 1"),
+            {'file_id': self.id}
+        ).first()
         if activity_post:
             return True
 
         # BusinessArea 사진 확인
-        business_area = db.session.query(db.exists().where(
-            db.text(f"photo_file_id = {self.id}")
-        )).scalar()
+        business_area = db.session.execute(
+            db.text("SELECT 1 FROM business_areas WHERE photo_file_id = :file_id LIMIT 1"),
+            {'file_id': self.id}
+        ).first()
         if business_area:
             return True
 
         # Newsletter PDF 확인
-        newsletter = db.session.query(db.exists().where(
-            db.text(f"pdf_file_id = {self.id}")
-        )).scalar()
+        newsletter = db.session.execute(
+            db.text("SELECT 1 FROM newsletters WHERE pdf_file_id = :file_id LIMIT 1"),
+            {'file_id': self.id}
+        ).first()
         if newsletter:
             return True
 

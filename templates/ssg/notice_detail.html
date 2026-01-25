@@ -118,47 +118,4 @@
         </div>
     </div>
 </article>
-
-<!-- Navigation -->
-<section class="bg-light-100 py-12">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {% if prev_notice %}
-            <a href="/notice/{{ prev_notice.id }}.html"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl hover:shadow-lg transition-all">
-                <div class="w-12 h-12 rounded-full bg-light-200 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-all">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 18L9 12L15 6"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <span class="text-xs text-dark-400 block mb-1">이전 글</span>
-                    <span class="font-semibold text-dark-800 group-hover:text-primary truncate block transition-colors">
-                        {{ prev_notice.title }}
-                    </span>
-                </div>
-            </a>
-            {% else %}
-            <div></div>
-            {% endif %}
-
-            {% if next_notice %}
-            <a href="/notice/{{ next_notice.id }}.html"
-               class="group flex items-center gap-4 p-6 bg-white rounded-2xl hover:shadow-lg transition-all md:flex-row-reverse md:text-right">
-                <div class="w-12 h-12 rounded-full bg-light-200 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-all">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 6L15 12L9 18"/>
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <span class="text-xs text-dark-400 block mb-1">다음 글</span>
-                    <span class="font-semibold text-dark-800 group-hover:text-primary truncate block transition-colors">
-                        {{ next_notice.title }}
-                    </span>
-                </div>
-            </a>
-            {% endif %}
-        </div>
-    </div>
-</section>
 {% endblock %}
