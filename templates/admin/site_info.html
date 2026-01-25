@@ -1,0 +1,136 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}사이트 정보{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">사이트 정보</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-3xl">
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">사이트 정보</h1>
+        <button type="submit" class="btn-notion btn-primary">저장</button>
+    </div>
+
+    <div class="space-y-6">
+        <!-- 기본 정보 -->
+        <div class="card-notion p-6">
+            <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
+                <span>🏠</span> 기본 정보
+            </h2>
+            <div class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">단체명</label>
+                        <input type="text" name="org_name" value="{{ info.org_name if info else '' }}"
+                               placeholder="사단법인 함께하는세상"
+                               class="input-notion">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">사이트명</label>
+                        <input type="text" name="site_name" value="{{ info.site_name if info else '' }}"
+                               placeholder="양산외국인노동자의집"
+                               class="input-notion">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">슬로건</label>
+                    <input type="text" name="slogan" value="{{ info.slogan if info else '' }}"
+                           placeholder="모든 이주민이 존엄하게 살아가는 세상"
+                           class="input-notion">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">소개 문구</label>
+                    <textarea name="intro_text" rows="3"
+                              placeholder="단체에 대한 간단한 소개..."
+                              class="input-notion">{{ info.intro_text if info else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- 연락처 -->
+        <div class="card-notion p-6">
+            <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
+                <span>📞</span> 연락처
+            </h2>
+            <div class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">대표자</label>
+                        <input type="text" name="representative" value="{{ info.representative if info else '' }}"
+                               placeholder="홍길동"
+                               class="input-notion">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">이메일</label>
+                        <input type="email" name="email" value="{{ info.email if info else '' }}"
+                               placeholder="info@example.org"
+                               class="input-notion">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">전화번호</label>
+                        <input type="tel" name="tel" value="{{ info.tel if info else '' }}"
+                               placeholder="055-123-4567"
+                               class="input-notion">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-1">팩스</label>
+                        <input type="tel" name="fax" value="{{ info.fax if info else '' }}"
+                               placeholder="055-123-4568"
+                               class="input-notion">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">주소</label>
+                    <input type="text" name="address" value="{{ info.address if info else '' }}"
+                           placeholder="경상남도 양산시 ..."
+                           class="input-notion">
+                </div>
+            </div>
+        </div>
+
+        <!-- 후원 계좌 -->
+        <div class="card-notion p-6">
+            <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
+                <span>💳</span> 후원 계좌
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">은행명</label>
+                    <input type="text" name="bank_name" value="{{ info.bank_name if info else '' }}"
+                           placeholder="농협"
+                           class="input-notion">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">계좌번호</label>
+                    <input type="text" name="bank_account" value="{{ info.bank_account if info else '' }}"
+                           placeholder="123-4567-8901-23"
+                           class="input-notion">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">예금주</label>
+                    <input type="text" name="bank_holder" value="{{ info.bank_holder if info else '' }}"
+                           placeholder="사단법인 함께하는세상"
+                           class="input-notion">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 저장 버튼 (하단) -->
+    <div class="mt-6 flex justify-end">
+        <button type="submit" class="btn-notion btn-primary">저장</button>
+    </div>
+</form>
+{% endblock %}

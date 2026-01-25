@@ -1,0 +1,115 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}관리자 계정{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">시스템</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">관리자 계정</span>
+{% endblock %}
+
+{% block content %}
+<!-- 헤더 -->
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold text-notion-text">관리자 계정</h1>
+    <a href="{{ url_for('admin.users_new') }}" class="btn-notion btn-primary">
+        + 새 관리자
+    </a>
+</div>
+
+<!-- 목록 -->
+<div class="card-notion">
+    <table class="table-notion">
+        <thead>
+            <tr>
+                <th class="w-28">아이디</th>
+                <th>이름</th>
+                <th class="w-32">권한</th>
+                <th class="w-24 text-center">상태</th>
+                <th class="w-40 text-center">마지막 로그인</th>
+                <th class="w-28 text-center">가입일</th>
+                <th class="w-32 text-center">관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr class="{{ 'opacity-50' if not user.is_active else '' }}">
+                <td class="font-mono text-sm">{{ user.username }}</td>
+                <td class="font-medium text-notion-text">
+                    {{ user.name or '-' }}
+                    {% if user.id == session.get('admin_id') %}
+                    <span class="text-xs text-notion-accent ml-1">(나)</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.role == 'super_admin' %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded">
+                        👑 최고관리자
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded">
+                        👤 관리자
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if user.is_active %}
+                    <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+                    <span class="text-xs text-green-600 ml-1">활성</span>
+                    {% else %}
+                    <span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
+                    <span class="text-xs text-gray-500 ml-1">비활성</span>
+                    {% endif %}
+                </td>
+                <td class="text-center text-sm text-notion-text-secondary">
+                    {{ user.last_login.strftime('%Y.%m.%d %H:%M') if user.last_login else '없음' }}
+                </td>
+                <td class="text-center text-sm text-notion-text-secondary">
+                    {{ user.created_at.strftime('%Y.%m.%d') if user.created_at else '-' }}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{{ url_for('admin.users_edit', id=user.id) }}"
+                           class="text-xs text-notion-accent hover:underline">수정</a>
+                        {% if user.id != session.get('admin_id') %}
+                        <button onclick="deleteUser({{ user.id }}, '{{ user.username }}')"
+                                class="text-xs text-red-500 hover:underline">삭제</button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center py-12 text-notion-text-muted">
+                    등록된 관리자가 없습니다.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- 안내 -->
+<div class="mt-6 p-4 bg-notion-sidebar rounded-lg text-sm text-notion-text-secondary">
+    <strong>권한 안내</strong>
+    <ul class="mt-2 space-y-1 list-disc list-inside">
+        <li><strong>최고관리자</strong>: 모든 기능 + 관리자 계정 관리</li>
+        <li><strong>관리자</strong>: 콘텐츠 관리, 사이트 설정, 후원신청 확인</li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteUser(id, username) {
+    if (!confirm(`'${username}' 계정을 삭제하시겠습니까?\n\n삭제된 계정은 복구할 수 없습니다.`)) return;
+
+    fetch(`/users/${id}/delete`, {
+        method: 'POST'
+    })
+    .then(() => {
+        location.reload();
+    });
+}
+</script>
+{% endblock %}

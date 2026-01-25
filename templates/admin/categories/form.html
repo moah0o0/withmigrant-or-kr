@@ -1,0 +1,75 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '카테고리 수정' if category else '카테고리 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.categories_list') }}" class="text-notion-text-secondary hover:text-notion-accent">카테고리</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if category else '추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-md">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '카테고리 수정' if category else '카테고리 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.categories_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">이름 *</label>
+            <input type="text" name="name" value="{{ category.name if category else '' }}"
+                   required placeholder="예: 교육활동, 문화활동"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">색상</label>
+            <div class="flex items-center gap-3">
+                <input type="color" name="color" value="{{ category.color if category else '#6d28d9' }}"
+                       class="w-12 h-10 rounded border border-notion-border cursor-pointer">
+                <input type="text" id="color-text" value="{{ category.color if category else '#6d28d9' }}"
+                       class="input-notion flex-1" readonly>
+            </div>
+            <div class="flex gap-2 mt-3">
+                {% set colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#6b7280'] %}
+                {% for c in colors %}
+                <button type="button" onclick="setColor('{{ c }}')"
+                        class="w-8 h-8 rounded-full border-2 border-transparent hover:border-notion-text"
+                        style="background-color: {{ c }}"></button>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if category %}
+        <div>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_active" {{ 'checked' if category.is_active else '' }}
+                       class="w-4 h-4 text-notion-accent rounded border-notion-border">
+                <span class="text-sm text-notion-text">활성화</span>
+            </label>
+        </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setColor(color) {
+    document.querySelector('input[name="color"]').value = color;
+    document.getElementById('color-text').value = color;
+}
+
+document.querySelector('input[name="color"]').addEventListener('input', function() {
+    document.getElementById('color-text').value = this.value;
+});
+</script>
+{% endblock %}

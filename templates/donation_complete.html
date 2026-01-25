@@ -1,0 +1,143 @@
+{% extends 'ssg/base.html' %}
+
+{% block title %}후원 신청 완료 - {{ site.site_name or '양산외국인노동자의집' }}{% endblock %}
+{% block canonical %}/donation-complete.html{% endblock %}
+{% block og_url %}/donation-complete.html{% endblock %}
+
+{% block content %}
+<!-- ========================================
+     DONATION COMPLETE
+     ======================================== -->
+
+<section class="w-full min-h-screen bg-light-100 py-16 md:py-24 relative overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="absolute inset-0">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/5 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-2xl mx-auto px-4 sm:px-8 relative z-10">
+        <div class="card-modern p-8 md:p-12 text-center">
+            <!-- Success Icon -->
+            <div class="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg shadow-primary/30">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="text-white">
+                    <path d="M14 24L22 32L34 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-3xl md:text-4xl font-bold text-dark-800 mb-4">
+                후원 신청이 완료되었습니다
+            </h1>
+
+            <!-- Message -->
+            <p class="text-lg text-dark-500 mb-8 leading-relaxed" id="thank-you-message">
+                <span class="font-bold text-primary" id="applicant-name"></span>님,<br>
+                소중한 마음에 진심으로 감사드립니다.<br>
+                담당자가 확인 후 연락드리겠습니다.
+            </p>
+
+            <!-- Summary Card -->
+            <div class="bg-light-200 rounded-2xl p-6 mb-8 text-left" id="summary-card">
+                <h3 class="text-lg font-bold text-dark-800 mb-4 flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    신청 내역
+                </h3>
+                <dl class="space-y-3" id="application-details">
+                    <!-- JavaScript로 동적 생성 -->
+                </dl>
+            </div>
+
+            <!-- Heart Message -->
+            <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-8">
+                <div class="flex items-center justify-center gap-2 text-primary">
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M24 44C24 44 4 32 4 18C4 10 10 4 18 4C22.5 4 24 8 24 8C24 8 25.5 4 30 4C38 4 44 10 44 18C44 32 24 44 24 44Z"/>
+                    </svg>
+                    <span class="font-bold text-lg">함께 만들어가는 세상</span>
+                    <svg width="24" height="24" viewBox="0 0 48 48" fill="currentColor">
+                        <path d="M24 44C24 44 4 32 4 18C4 10 10 4 18 4C22.5 4 24 8 24 8C24 8 25.5 4 30 4C38 4 44 10 44 18C44 32 24 44 24 44Z"/>
+                    </svg>
+                </div>
+                <p class="text-sm text-dark-500 mt-3">
+                    여러분의 후원금은 이주민 인권 상담, 쉼터 운영, 교육 프로그램 등에 소중하게 사용됩니다.
+                </p>
+            </div>
+
+            <!-- Action Button -->
+            <a href="{{ STATIC_SITE_URL }}" class="btn-primary inline-flex items-center justify-center gap-2 px-8 py-4 text-lg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                홈으로 돌아가기
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // sessionStorage에서 신청 정보 가져오기
+    const applicationData = sessionStorage.getItem('donationApplication');
+
+    if (!applicationData) {
+        // 데이터가 없으면 홈으로 리다이렉트
+        window.location.href = '/';
+        return;
+    }
+
+    try {
+        const application = JSON.parse(applicationData);
+
+        // 신청자 이름 표시
+        document.getElementById('applicant-name').textContent = application.name || '';
+
+        // 신청 내역 표시
+        const detailsContainer = document.getElementById('application-details');
+
+        // 금액 포맷팅
+        const formattedAmount = parseInt(application.amount || 0).toLocaleString('ko-KR');
+
+        detailsContainer.innerHTML = `
+            <div class="flex justify-between py-3 border-b border-light-300">
+                <dt class="text-dark-400">신청자</dt>
+                <dd class="font-semibold text-dark-800">${application.name || ''}</dd>
+            </div>
+            <div class="flex justify-between py-3 border-b border-light-300">
+                <dt class="text-dark-400">연락처</dt>
+                <dd class="font-semibold text-dark-800">${application.phone || ''}</dd>
+            </div>
+            <div class="flex justify-between py-3 border-b border-light-300">
+                <dt class="text-dark-400">월 후원금액</dt>
+                <dd class="font-bold text-primary text-lg">${formattedAmount}원</dd>
+            </div>
+            <div class="flex justify-between py-3 border-b border-light-300">
+                <dt class="text-dark-400">출금일</dt>
+                <dd class="font-semibold text-dark-800">매월 ${application.withdrawal_date || ''}일</dd>
+            </div>
+            <div class="flex justify-between py-3">
+                <dt class="text-dark-400">출금계좌</dt>
+                <dd class="font-semibold text-dark-800">${application.bank_name || ''} ${application.account_number || ''}</dd>
+            </div>
+        `;
+
+        // 표시 후 sessionStorage 정리
+        sessionStorage.removeItem('donationApplication');
+
+    } catch (error) {
+        console.error('신청 정보 파싱 오류:', error);
+        window.location.href = '/';
+    }
+});
+</script>
+{% endblock %}

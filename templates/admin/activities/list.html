@@ -1,0 +1,170 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}활동후기 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">콘텐츠 관리</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">활동후기</span>
+{% endblock %}
+
+{% block content %}
+<!-- 헤더 -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">활동후기</h1>
+        <p class="text-sm text-notion-text-muted mt-1">총 {{ pagination.total }}개</p>
+    </div>
+    <a href="{{ url_for('admin.activities_new') }}" class="btn-notion btn-primary">
+        + 새 활동후기
+    </a>
+</div>
+
+<!-- 필터 & 검색 -->
+<div class="card-notion mb-6">
+    <form method="GET" class="p-4">
+        <div class="flex flex-wrap gap-3">
+            <!-- 카테고리 필터 -->
+            <select name="category" onchange="this.form.submit()"
+                    class="input-notion w-auto">
+                <option value="">전체 카테고리</option>
+                <option value="__none__" {{ 'selected' if current_category == '__none__' else '' }}>카테고리 없음</option>
+                {% for cat in categories %}
+                <option value="{{ cat.name }}" {{ 'selected' if current_category == cat.name else '' }}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <!-- 검색 -->
+            <div class="flex gap-2 flex-1">
+                <input type="text" name="q" value="{{ q }}" placeholder="제목으로 검색..."
+                       class="input-notion flex-1">
+                <button type="submit" class="btn-notion btn-secondary">검색</button>
+                {% if q or current_category %}
+                <a href="{{ url_for('admin.activities_list') }}" class="btn-notion btn-secondary">초기화</a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 목록 -->
+<div class="card-notion overflow-hidden">
+    <div class="table-scroll">
+    <table class="table-notion min-w-[700px]">
+        <thead>
+            <tr>
+                <th class="w-20">썸네일</th>
+                <th>제목</th>
+                <th class="w-28">카테고리</th>
+                <th class="w-28 text-center">작성일</th>
+                <th class="w-20 text-center">조회</th>
+                <th class="w-32 text-center">관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in pagination.items %}
+            <tr id="activity-{{ activity.id }}">
+                <td>
+                    {% if activity.image_url %}
+                    <img src="{{ activity.image_url }}" alt="" class="w-16 h-12 rounded object-cover">
+                    {% else %}
+                    <div class="w-16 h-12 rounded bg-notion-sidebar flex items-center justify-center text-lg">📝</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.activities_edit', id=activity.id) }}"
+                       class="hover:text-notion-accent transition-colors font-medium">
+                        {{ activity.title }}
+                    </a>
+                    {% if activity.content %}
+                    <p class="text-xs text-notion-text-muted mt-1 line-clamp-1">
+                        {{ activity.content|striptags|truncate(50) }}
+                    </p>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activity.category %}
+                    {% set cat_color = '#6d28d9' %}
+                    {% for c in all_categories %}{% if c.name == activity.category %}{% set cat_color = c.color %}{% endif %}{% endfor %}
+                    <span class="inline-block px-2 py-1 text-xs text-white rounded"
+                          style="background-color: {{ cat_color }}">
+                        {{ activity.category }}
+                    </span>
+                    {% else %}
+                    <span class="text-notion-text-muted text-sm">-</span>
+                    {% endif %}
+                </td>
+                <td class="text-center text-notion-text-secondary text-sm">
+                    {{ activity.created_at.strftime('%Y.%m.%d') if activity.created_at else '-' }}
+                </td>
+                <td class="text-center text-notion-text-secondary text-sm">
+                    {{ activity.view_count or 0 }}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{{ url_for('admin.activities_edit', id=activity.id) }}"
+                           class="text-xs text-notion-accent hover:underline">수정</a>
+                        <button onclick="deleteActivity({{ activity.id }})"
+                                class="text-xs text-red-500 hover:underline">삭제</button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-12 text-notion-text-muted">
+                    등록된 활동후기가 없습니다.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- 페이지네이션 -->
+{% if pagination.pages > 1 %}
+<div class="flex items-center justify-center gap-2 mt-6">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.activities_list', page=pagination.prev_num, q=q, category=current_category) }}"
+       class="btn-notion btn-secondary">← 이전</a>
+    {% endif %}
+
+    <span class="text-sm text-notion-text-secondary px-4">
+        {{ pagination.page }} / {{ pagination.pages }}
+    </span>
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.activities_list', page=pagination.next_num, q=q, category=current_category) }}"
+       class="btn-notion btn-secondary">다음 →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteActivity(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    fetch(`/activities/${id}/delete`, {
+        method: 'POST',
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`삭제 실패 (${res.status})`);
+        }
+        return res;
+    })
+    .then(() => {
+        document.getElementById(`activity-${id}`).remove();
+    })
+    .catch(err => {
+        console.error('삭제 오류:', err);
+        alert('삭제 중 오류가 발생했습니다: ' + err.message);
+    });
+}
+</script>
+{% endblock %}

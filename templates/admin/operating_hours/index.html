@@ -1,0 +1,120 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}운영시간 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">운영시간</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">운영시간 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">소개 페이지에 표시되는 주요 사업별 운영시간을 관리합니다.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- 주요 사업 운영시간 -->
+    <div class="card-notion">
+        <div class="p-4 border-b border-notion-border">
+            <h2 class="font-semibold text-notion-text">주요 사업 운영시간</h2>
+        </div>
+        <div class="p-4">
+            <!-- 추가 폼 -->
+            <form method="POST" action="{{ url_for('admin.operating_hours_add') }}" class="mb-4 p-3 bg-notion-sidebar rounded">
+                <div class="flex gap-2 mb-2">
+                    <input type="text" name="name" placeholder="사업명 (예: 이주민 인권 상담)" required
+                           class="input-notion flex-1">
+                </div>
+                <div class="flex gap-2">
+                    <textarea name="schedule" rows="2" placeholder="운영시간&#10;예: 월~목요일 : 10:00~18:00&#10;    금~일요일 : 12:00~18:00"
+                              class="input-notion flex-1"></textarea>
+                    <button type="submit" class="btn-notion btn-primary h-fit">추가</button>
+                </div>
+            </form>
+
+            <!-- 운영시간 목록 -->
+            <ul id="programs-list" class="space-y-3">
+                {% for program in programs %}
+                <li class="p-3 bg-notion-sidebar rounded group" data-id="{{ program.id }}">
+                    <form method="POST" action="{{ url_for('admin.operating_hours_edit', id=program.id) }}">
+                        <div class="flex items-start gap-2 mb-2">
+                            <span class="cursor-move text-notion-text-muted drag-handle mt-1">⋮⋮</span>
+                            <input type="text" name="name" value="{{ program.name }}" required
+                                   class="input-notion flex-1 font-medium">
+                            <button type="button" onclick="deleteProgram({{ program.id }})"
+                                    class="text-xs text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">삭제</button>
+                        </div>
+                        <div class="flex gap-2 ml-6">
+                            <textarea name="schedule" rows="2" class="input-notion flex-1 text-sm">{{ program.schedule }}</textarea>
+                            <button type="submit" class="btn-notion btn-secondary text-xs h-fit">저장</button>
+                        </div>
+                    </form>
+                </li>
+                {% else %}
+                <li class="text-sm text-notion-text-muted text-center py-4">등록된 운영시간이 없습니다.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- 사무실 정보 -->
+    <div class="card-notion">
+        <div class="p-4 border-b border-notion-border">
+            <h2 class="font-semibold text-notion-text">사무실 정보</h2>
+        </div>
+        <div class="p-4">
+            <form method="POST" action="{{ url_for('admin.operating_hours_office') }}">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-2">사무실 근무시간</label>
+                        <textarea name="office_hours" rows="3" class="input-notion"
+                                  placeholder="예: 월~목요일 : 10:00~18:00&#10;금~일요일 : 12:00~18:00">{{ office.office_hours }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-notion-text mb-2">휴무일</label>
+                        <input type="text" name="closed_days" value="{{ office.closed_days }}"
+                               placeholder="예: 금요일, 토요일은 쉽니다."
+                               class="input-notion">
+                    </div>
+                    <button type="submit" class="btn-notion btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<p class="text-xs text-notion-text-muted mt-4">운영시간 항목은 드래그하여 순서를 변경할 수 있습니다.</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+// 운영시간 순서 변경
+const programsList = document.getElementById('programs-list');
+if (programsList && programsList.querySelector('[data-id]')) {
+    new Sortable(programsList, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: function() {
+            const order = [...programsList.querySelectorAll('[data-id]')].map(el => el.dataset.id);
+            fetch('{{ url_for("admin.operating_hours_reorder") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order })
+            });
+        }
+    });
+}
+
+function deleteProgram(id) {
+    if (confirm('운영시간 항목을 삭제하시겠습니까?')) {
+        fetch(`/operating-hours/${id}/delete`, { method: 'POST' })
+            .then(() => location.reload());
+    }
+}
+</script>
+{% endblock %}

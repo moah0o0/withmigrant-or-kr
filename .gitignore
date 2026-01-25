@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Flask
+instance/
+.webassets-cache
+
+# 환경변수
+.env
+.env.local
+.env.production
+
+# 데이터베이스
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# 로그
+logs/
+*.log
+
+# 빌드 결과물 (dist는 배포시 필요하므로 포함)
+# dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.bak
+*.swp
+temp/
+tmp/
+
+# 업로드 파일 (보안상 제외, 서버에서 직접 관리)
+# dist/uploads/

@@ -1,0 +1,132 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}연혁 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">연혁</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">연혁 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">"걸어온 길" 페이지에 표시되는 연혁을 관리합니다.</p>
+    </div>
+    <a href="{{ url_for('admin.history_section_new') }}" class="btn-notion btn-primary">+ 섹션 추가</a>
+</div>
+
+<div class="space-y-6">
+    {% for section in sections %}
+    <div class="card-notion overflow-hidden">
+        <div class="p-4 bg-notion-sidebar border-b border-notion-border flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-notion-text">{{ section.subtitle or '제목 없음' }}</h2>
+                {% if section.summary_title %}
+                <p class="text-sm text-notion-text-muted">{{ section.summary_title }}</p>
+                {% endif %}
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ url_for('admin.history_item_new', section_id=section.id) }}" class="btn-notion btn-secondary text-sm">+ 항목 추가</a>
+                <a href="{{ url_for('admin.history_section_edit', id=section.id) }}" class="btn-notion btn-secondary text-sm">섹션 수정</a>
+                <button onclick="deleteSection({{ section.id }})" class="btn-notion btn-danger text-sm">삭제</button>
+            </div>
+        </div>
+
+        {% if section.summary %}
+        <div class="p-4 bg-blue-50 border-b border-blue-100 text-sm text-blue-800">
+            {{ section.summary }}
+        </div>
+        {% endif %}
+
+        <table class="table-notion">
+            <thead>
+                <tr>
+                    <th class="w-10"></th>
+                    <th class="w-20">연도</th>
+                    <th>내용</th>
+                    <th class="w-24 text-center">관리</th>
+                </tr>
+            </thead>
+            <tbody class="sortable-items">
+                {% for item in section.items|sort(attribute='display_order') %}
+                <tr data-id="{{ item.id }}">
+                    <td class="cursor-move text-notion-text-muted text-center">⋮⋮</td>
+                    <td class="font-medium text-notion-accent">{{ item.year or '-' }}</td>
+                    <td>{{ item.content }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('admin.history_item_edit', id=item.id) }}" class="text-xs text-blue-600 hover:underline">수정</a>
+                        <span class="text-notion-text-muted mx-1">|</span>
+                        <button onclick="deleteItem({{ item.id }})" class="text-xs text-red-600 hover:underline">삭제</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-8 text-notion-text-muted">
+                        이 섹션에 항목이 없습니다.
+                        <a href="{{ url_for('admin.history_item_new', section_id=section.id) }}" class="text-notion-accent hover:underline ml-2">+ 항목 추가</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="text-xs text-notion-text-muted p-3 border-t border-notion-border">💡 행을 드래그하여 순서를 변경할 수 있습니다.</p>
+    </div>
+    {% else %}
+    <div class="card-notion p-12 text-center text-notion-text-muted">
+        등록된 연혁 섹션이 없습니다.
+        <a href="{{ url_for('admin.history_section_new') }}" class="text-notion-accent hover:underline ml-2">+ 첫 번째 섹션 추가</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+// 각 섹션의 tbody에 Sortable 적용
+document.querySelectorAll('.sortable-items').forEach(tbody => {
+    new Sortable(tbody, {
+        animation: 150,
+        handle: 'td:first-child',
+        onEnd: function() {
+            const order = [...tbody.querySelectorAll('tr[data-id]')].map(row => row.dataset.id);
+            fetch('{{ url_for("admin.history_items_reorder") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order })
+            });
+        }
+    });
+});
+
+function deleteSection(id) {
+    if (confirm('이 섹션과 포함된 모든 항목이 삭제됩니다. 계속하시겠습니까?')) {
+        fetch(`/history/sections/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error('삭제 실패');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+    }
+}
+
+function deleteItem(id) {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        fetch(`/history/items/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error('삭제 실패');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+    }
+}
+</script>
+{% endblock %}

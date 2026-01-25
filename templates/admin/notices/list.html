@@ -1,0 +1,162 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}공지사항 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">콘텐츠 관리</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">공지사항</span>
+{% endblock %}
+
+{% block content %}
+<!-- 헤더 -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">공지사항</h1>
+        <p class="text-sm text-notion-text-muted mt-1">총 {{ pagination.total }}개</p>
+    </div>
+    <a href="{{ url_for('admin.notices_new') }}" class="btn-notion btn-primary">
+        + 새 공지사항
+    </a>
+</div>
+
+<!-- 검색 -->
+<div class="card-notion mb-6">
+    <form method="GET" class="p-4 flex gap-3">
+        <input type="text" name="q" value="{{ q }}" placeholder="제목으로 검색..."
+               class="input-notion flex-1">
+        <button type="submit" class="btn-notion btn-secondary">검색</button>
+        {% if q %}
+        <a href="{{ url_for('admin.notices_list') }}" class="btn-notion btn-secondary">초기화</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- 목록 -->
+<div class="card-notion overflow-hidden">
+    <div class="table-scroll">
+    <table class="table-notion min-w-[600px]">
+        <thead>
+            <tr>
+                <th class="w-16">고정</th>
+                <th>제목</th>
+                <th class="w-28 text-center">작성일</th>
+                <th class="w-20 text-center">조회</th>
+                <th class="w-32 text-center">관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notice in pagination.items %}
+            <tr id="notice-{{ notice.id }}">
+                <td class="text-center">
+                    <button onclick="togglePin({{ notice.id }})"
+                            class="pin-btn text-lg opacity-50 hover:opacity-100 transition-opacity"
+                            data-pinned="{{ 'true' if notice.is_pinned else 'false' }}">
+                        {{ '📌' if notice.is_pinned else '📍' }}
+                    </button>
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.notices_edit', id=notice.id) }}"
+                       class="hover:text-notion-accent transition-colors">
+                        {% if notice.is_pinned %}
+                        <span class="text-xs bg-notion-accent text-white px-1.5 py-0.5 rounded mr-2">고정</span>
+                        {% endif %}
+                        {{ notice.title }}
+                    </a>
+                </td>
+                <td class="text-center text-notion-text-secondary text-sm">
+                    {{ notice.created_at.strftime('%Y.%m.%d') if notice.created_at else '-' }}
+                </td>
+                <td class="text-center text-notion-text-secondary text-sm">
+                    {{ notice.view_count or 0 }}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{{ url_for('admin.notices_edit', id=notice.id) }}"
+                           class="text-xs text-notion-accent hover:underline">수정</a>
+                        <button onclick="deleteNotice({{ notice.id }})"
+                                class="text-xs text-red-500 hover:underline">삭제</button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center py-12 text-notion-text-muted">
+                    등록된 공지사항이 없습니다.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+<!-- 페이지네이션 -->
+{% if pagination.pages > 1 %}
+<div class="flex items-center justify-center gap-2 mt-6">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.notices_list', page=pagination.prev_num, q=q) }}"
+       class="btn-notion btn-secondary">← 이전</a>
+    {% endif %}
+
+    <span class="text-sm text-notion-text-secondary px-4">
+        {{ pagination.page }} / {{ pagination.pages }}
+    </span>
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.notices_list', page=pagination.next_num, q=q) }}"
+       class="btn-notion btn-secondary">다음 →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePin(id) {
+    fetch(`/notices/${id}/toggle-pin`, {
+        method: 'POST',
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => {
+                throw new Error(`고정 토글 실패 (${res.status}): ${text}`);
+            });
+        }
+        return res.json();
+    })
+    .then(data => {
+        location.reload();
+    })
+    .catch(err => {
+        console.error('토글 오류:', err);
+        alert('고정 토글 중 오류가 발생했습니다: ' + err.message);
+    });
+}
+
+function deleteNotice(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    fetch(`/notices/${id}/delete`, {
+        method: 'POST',
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => {
+                throw new Error(`삭제 실패 (${res.status}): ${text}`);
+            });
+        }
+        return res;
+    })
+    .then(() => {
+        document.getElementById(`notice-${id}`).remove();
+    })
+    .catch(err => {
+        console.error('삭제 오류:', err);
+        alert('삭제 중 오류가 발생했습니다: ' + err.message);
+    });
+}
+</script>
+{% endblock %}

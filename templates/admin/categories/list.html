@@ -1,0 +1,217 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}카테고리 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">카테고리</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">카테고리 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">활동후기 분류에 사용되는 카테고리를 관리합니다.</p>
+    </div>
+    <div class="flex items-center gap-3">
+        {% if categories|length > 1 %}
+        <button onclick="openMergeModal()" class="btn-notion btn-secondary">카테고리 병합</button>
+        {% endif %}
+        <a href="{{ url_for('admin.categories_new') }}" class="btn-notion btn-primary">+ 카테고리 추가</a>
+    </div>
+</div>
+
+<div class="card-notion overflow-hidden">
+    <table class="table-notion">
+        <thead>
+            <tr>
+                <th class="w-12"></th>
+                <th>이름</th>
+                <th class="w-20 text-center">게시물</th>
+                <th class="w-24">색상</th>
+                <th class="w-20 text-center">상태</th>
+                <th class="w-32 text-center">관리</th>
+            </tr>
+        </thead>
+        <tbody id="sortable-list">
+            {% for category in categories %}
+            <tr data-id="{{ category.id }}">
+                <td class="cursor-move text-notion-text-muted">⋮⋮</td>
+                <td>
+                    <div class="flex items-center gap-3">
+                        <span class="w-4 h-4 rounded" style="background-color: {{ category.color }}"></span>
+                        <span class="font-medium text-notion-text">{{ category.name }}</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <span class="text-sm text-notion-text-secondary">{{ post_counts.get(category.id, 0) }}개</span>
+                </td>
+                <td>
+                    <code class="text-xs bg-notion-sidebar px-2 py-1 rounded">{{ category.color }}</code>
+                </td>
+                <td class="text-center">
+                    {% if category.is_active %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded">활성</span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">비활성</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{{ url_for('admin.categories_edit', id=category.id) }}" class="text-xs text-blue-600 hover:underline">수정</a>
+                        <span class="text-notion-text-muted">|</span>
+                        <button onclick="deleteCategory({{ category.id }})" class="text-xs text-red-600 hover:underline">삭제</button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-12 text-notion-text-muted">
+                    등록된 카테고리가 없습니다.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="text-xs text-notion-text-muted mt-4">💡 행을 드래그하여 순서를 변경할 수 있습니다.</p>
+
+<!-- 병합 모달 -->
+<div id="mergeModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <h3 class="text-lg font-semibold text-notion-text mb-4">카테고리 병합</h3>
+        <p class="text-sm text-notion-text-muted mb-4">선택한 카테고리의 모든 게시물을 대상 카테고리로 이동하고, 원본 카테고리를 삭제합니다.</p>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-notion-text mb-2">병합할 카테고리 (삭제됨)</label>
+                <select id="sourceCategory" class="input-notion">
+                    <option value="">선택하세요</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" data-name="{{ category.name }}" data-count="{{ post_counts.get(category.id, 0) }}">
+                        {{ category.name }} ({{ post_counts.get(category.id, 0) }}개)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-center text-notion-text-muted">↓</div>
+            <div>
+                <label class="block text-sm font-medium text-notion-text mb-2">대상 카테고리 (유지됨)</label>
+                <select id="targetCategory" class="input-notion">
+                    <option value="">선택하세요</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" data-name="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeMergeModal()" class="btn-notion btn-secondary">취소</button>
+            <button onclick="mergeCategories()" class="btn-notion btn-danger">병합</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+new Sortable(document.getElementById('sortable-list'), {
+    animation: 150,
+    handle: 'td:first-child',
+    onEnd: function() {
+        const order = [...document.querySelectorAll('#sortable-list tr[data-id]')].map(row => row.dataset.id);
+        fetch('{{ url_for("admin.categories_reorder") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order })
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('재정렬 저장 실패');
+            }
+        })
+        .catch(err => {
+            console.error('재정렬 오류:', err);
+            alert('순서 저장 중 오류가 발생했습니다. 페이지를 새로고침합니다.');
+            location.reload();
+        });
+    }
+});
+
+function deleteCategory(id) {
+    if (confirm('정말 삭제하시겠습니까? 해당 카테고리의 게시물들은 미분류로 변경됩니다.')) {
+        fetch(`/categories/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        throw new Error(`삭제 실패 (${res.status}): ${text}`);
+                    });
+                }
+                return res;
+            })
+            .then(() => location.reload())
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다: ' + err.message);
+            });
+    }
+}
+
+function openMergeModal() {
+    document.getElementById('mergeModal').classList.remove('hidden');
+    document.getElementById('sourceCategory').value = '';
+    document.getElementById('targetCategory').value = '';
+}
+
+function closeMergeModal() {
+    document.getElementById('mergeModal').classList.add('hidden');
+}
+
+function mergeCategories() {
+    const sourceId = document.getElementById('sourceCategory').value;
+    const targetId = document.getElementById('targetCategory').value;
+
+    if (!sourceId || !targetId) {
+        alert('카테고리를 선택해주세요.');
+        return;
+    }
+
+    if (sourceId === targetId) {
+        alert('같은 카테고리끼리는 병합할 수 없습니다.');
+        return;
+    }
+
+    const sourceName = document.getElementById('sourceCategory').selectedOptions[0].dataset.name;
+    const targetName = document.getElementById('targetCategory').selectedOptions[0].dataset.name;
+    const postCount = document.getElementById('sourceCategory').selectedOptions[0].dataset.count;
+
+    if (!confirm(`"${sourceName}" 카테고리의 ${postCount}개 게시물을 "${targetName}"(으)로 이동하고, "${sourceName}" 카테고리를 삭제합니다.\n\n계속하시겠습니까?`)) {
+        return;
+    }
+
+    fetch('{{ url_for("admin.categories_merge") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source_id: sourceId, target_id: targetId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error || '병합에 실패했습니다.');
+        }
+    });
+}
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeMergeModal();
+});
+</script>
+{% endblock %}

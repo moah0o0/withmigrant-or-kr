@@ -1,0 +1,119 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}메인 사진 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">메인 사진</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">메인 사진 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">메인 페이지 히어로 슬라이더에 표시되는 사진을 관리합니다.</p>
+    </div>
+    <a href="{{ url_for('admin.hero_photos_new') }}" class="btn-notion btn-primary">+ 사진 추가</a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="sortable-grid">
+    {% for photo in photos %}
+    <div class="card-notion overflow-hidden" data-id="{{ photo.id }}">
+        <div class="aspect-video bg-notion-sidebar relative group">
+            {% if photo.url %}
+            <img src="{{ photo.url }}" alt="" class="w-full h-full object-cover">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-notion-text-muted">
+                <span class="text-4xl">🖼️</span>
+            </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                <a href="{{ url_for('admin.hero_photos_edit', id=photo.id) }}" class="btn-notion bg-white text-notion-text text-sm">수정</a>
+                <button onclick="deletePhoto({{ photo.id }})" class="btn-notion btn-danger text-sm">삭제</button>
+            </div>
+            <!-- 활성화 토글 -->
+            <button onclick="toggleActive({{ photo.id }})"
+                    class="absolute top-2 right-2 px-2 py-1 text-xs rounded {{ 'bg-green-500 text-white' if photo.is_active else 'bg-gray-400 text-white' }}">
+                {{ '활성' if photo.is_active else '비활성' }}
+            </button>
+            <!-- 드래그 핸들 -->
+            <div class="absolute top-2 left-2 cursor-move text-white bg-black/30 px-2 py-1 rounded text-xs drag-handle">⋮⋮</div>
+        </div>
+        <div class="p-4">
+            <p class="text-sm text-notion-text line-clamp-2">{{ photo.description or '설명 없음' }}</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-full text-center py-12 text-notion-text-muted">
+        등록된 사진이 없습니다.
+    </div>
+    {% endfor %}
+</div>
+
+<p class="text-xs text-notion-text-muted mt-4">💡 카드를 드래그하여 순서를 변경할 수 있습니다.</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+new Sortable(document.getElementById('sortable-grid'), {
+    animation: 150,
+    handle: '.drag-handle',
+    onEnd: function() {
+        const order = [...document.querySelectorAll('#sortable-grid [data-id]')].map(el => el.dataset.id);
+        fetch('{{ url_for("admin.hero_photos_reorder") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order })
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('재정렬 저장 실패');
+            }
+        })
+        .catch(err => {
+            console.error('재정렬 오류:', err);
+            alert('순서 저장 중 오류가 발생했습니다. 페이지를 새로고침합니다.');
+            location.reload();
+        });
+    }
+});
+
+function toggleActive(id) {
+    fetch(`/hero-photos/${id}/toggle-active`, { method: 'POST' })
+        .then(res => {
+            if (!res.ok) {
+                return res.text().then(text => {
+                    throw new Error(`활성화 토글 실패 (${res.status}): ${text}`);
+                });
+            }
+            return res;
+        })
+        .then(() => location.reload())
+        .catch(err => {
+            console.error('토글 오류:', err);
+            alert('활성화 토글 중 오류가 발생했습니다: ' + err.message);
+        });
+}
+
+function deletePhoto(id) {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        fetch(`/hero-photos/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        throw new Error(`삭제 실패 (${res.status}): ${text}`);
+                    });
+                }
+                return res;
+            })
+            .then(() => location.reload())
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다: ' + err.message);
+            });
+    }
+}
+</script>
+{% endblock %}

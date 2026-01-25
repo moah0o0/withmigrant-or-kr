@@ -1,0 +1,105 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}사업분야 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">사업분야</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">사업분야 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">소개 페이지에 표시되는 주요 사업분야를 관리합니다.</p>
+    </div>
+    <a href="{{ url_for('admin.business_areas_new') }}" class="btn-notion btn-primary">+ 사업분야 추가</a>
+</div>
+
+<div class="card-notion overflow-hidden">
+    <table class="table-notion">
+        <thead>
+            <tr>
+                <th class="w-12"></th>
+                <th>이름</th>
+                <th>설명</th>
+                <th class="w-20 text-center">상태</th>
+                <th class="w-32 text-center">관리</th>
+            </tr>
+        </thead>
+        <tbody id="sortable-list">
+            {% for area in areas %}
+            <tr data-id="{{ area.id }}">
+                <td class="cursor-move text-notion-text-muted">⋮⋮</td>
+                <td>
+                    <div class="flex items-center gap-3">
+                        {% if area.image_url %}
+                        <img src="{{ area.image_url }}" alt="" class="w-10 h-10 rounded object-cover">
+                        {% else %}
+                        <div class="w-10 h-10 rounded bg-notion-sidebar flex items-center justify-center text-notion-text-muted">📂</div>
+                        {% endif %}
+                        <span class="font-medium text-notion-text">{{ area.name }}</span>
+                    </div>
+                </td>
+                <td class="text-sm text-notion-text-secondary">{{ area.description or '-' }}</td>
+                <td class="text-center">
+                    {% if area.is_active %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded">활성</span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">비활성</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{{ url_for('admin.business_areas_edit', id=area.id) }}" class="text-xs text-blue-600 hover:underline">수정</a>
+                        <span class="text-notion-text-muted">|</span>
+                        <button onclick="deleteItem({{ area.id }})" class="text-xs text-red-600 hover:underline">삭제</button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center py-12 text-notion-text-muted">
+                    등록된 사업분야가 없습니다.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="text-xs text-notion-text-muted mt-4">💡 행을 드래그하여 순서를 변경할 수 있습니다.</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+new Sortable(document.getElementById('sortable-list'), {
+    animation: 150,
+    handle: 'td:first-child',
+    onEnd: function() {
+        const order = [...document.querySelectorAll('#sortable-list tr[data-id]')].map(row => row.dataset.id);
+        fetch('{{ url_for("admin.business_areas_reorder") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order })
+        });
+    }
+});
+
+function deleteItem(id) {
+    if (confirm('정말 삭제하시겠습니까?')) {
+        fetch(`/business-areas/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error('삭제 실패');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+    }
+}
+</script>
+{% endblock %}

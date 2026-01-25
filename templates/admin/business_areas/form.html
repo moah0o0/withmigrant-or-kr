@@ -1,0 +1,74 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '사업분야 수정' if area else '사업분야 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.business_areas_list') }}" class="text-notion-text-secondary hover:text-notion-accent">사업분야</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if area else '추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="max-w-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '사업분야 수정' if area else '사업분야 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.business_areas_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">이름 *</label>
+            <input type="text" name="name" value="{{ area.name if area else '' }}"
+                   required placeholder="예: 상담 및 인권 지원"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">한 줄 설명</label>
+            <input type="text" name="description" value="{{ area.description if area else '' }}"
+                   placeholder="간단한 설명을 입력하세요"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">상세 내용</label>
+            <textarea name="details" rows="6" class="input-notion"
+                      placeholder="줄바꿈으로 구분하여 입력하세요&#10;&#10;예:&#10;- 노동, 임금, 산재 등 상담&#10;- 법률 지원 연계&#10;- 긴급 쉼터 운영">{{ (area.details|join('\n')) if area and area.details else '' }}</textarea>
+            <p class="text-xs text-notion-text-muted mt-1">줄바꿈으로 항목을 구분합니다.</p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">대표 이미지</label>
+            {% if area and area.image_url %}
+            <div class="mb-3">
+                <img src="{{ area.image_url }}" alt="" class="w-32 h-32 object-cover rounded">
+            </div>
+            {% endif %}
+            <div class="space-y-3">
+                <input type="file" name="photo" accept="image/*"
+                       class="w-full text-sm text-notion-text-secondary file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-notion-sidebar file:text-notion-text hover:file:bg-notion-hover">
+                <div class="text-center text-xs text-notion-text-muted">또는</div>
+                <input type="url" name="photo_url" value="{{ area.photo_url if area and area.photo_url else '' }}"
+                       placeholder="이미지 URL" class="input-notion">
+            </div>
+        </div>
+
+        {% if area %}
+        <div>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_active" {{ 'checked' if area.is_active else '' }}
+                       class="w-4 h-4 text-notion-accent rounded border-notion-border">
+                <span class="text-sm text-notion-text">활성화</span>
+            </label>
+        </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}
