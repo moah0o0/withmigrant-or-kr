@@ -6,7 +6,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -26,21 +25,24 @@ venv/
 env/
 ENV/
 .venv
+.pytest_cache/
 
 # Flask
 instance/
 .webassets-cache
 
-# Database
+# 환경변수
+.env
+.env.local
+.env.production
+.env.*.local
+
+# 데이터베이스
 *.db
+*.db-journal
 *.sqlite
 *.sqlite3
 data.db
-
-# Environment variables
-.env
-.env.local
-.env.*.local
 
 # IDE
 .vscode/
@@ -53,19 +55,22 @@ data.db
 .DS_Store
 Thumbs.db
 
-# Uploads
-dist
-dist/uploads/*
-!dist/uploads/.gitkeep
-
-# Logs
-*.log
+# 로그
 logs/
+*.log
 
 # Cache
 .cache/
 .pytest_cache/
 
+# 임시 파일
+*.tmp
+*.bak
+temp/
+tmp/
+
+# 업로드 파일 (보안상 제외, 서버에서 직접 관리)
+dist/uploads/
+
 # Build artifacts
-dist/
 *.pyc
