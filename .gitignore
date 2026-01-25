@@ -54,6 +54,7 @@ data.db
 Thumbs.db
 
 # Uploads
+dist
 dist/uploads/*
 !dist/uploads/.gitkeep
 
