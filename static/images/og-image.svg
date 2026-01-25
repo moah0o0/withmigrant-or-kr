@@ -1,0 +1,62 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 그라디언트 -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#531DA6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+
+  <!-- 장식 원형 패턴 -->
+  <circle cx="-50" cy="100" r="200" fill="white" opacity="0.05"/>
+  <circle cx="1250" cy="530" r="250" fill="white" opacity="0.05"/>
+  <circle cx="900" cy="-50" r="150" fill="white" opacity="0.08"/>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <g filter="url(#shadow)">
+    <!-- 흰색 카드 배경 -->
+    <rect x="100" y="120" width="1000" height="390" rx="24" fill="white" opacity="0.98"/>
+
+    <!-- 상단 장식 라인 -->
+    <rect x="100" y="120" width="1000" height="8" rx="4" fill="#531DA6"/>
+
+    <!-- 메인 텍스트 -->
+    <text x="600" y="220" font-family="Pretendard, -apple-system, sans-serif" font-size="48" font-weight="700" fill="#1E1E1E" text-anchor="middle">
+      양산외국인노동자의집
+    </text>
+
+    <!-- 부제목 -->
+    <text x="600" y="280" font-family="Pretendard, -apple-system, sans-serif" font-size="32" font-weight="500" fill="#531DA6" text-anchor="middle">
+      더불어 사는 세상
+    </text>
+
+    <!-- 구분선 -->
+    <line x1="350" y1="320" x2="850" y2="320" stroke="#E5E7EB" stroke-width="2"/>
+
+    <!-- 설명 텍스트 -->
+    <text x="600" y="370" font-family="Pretendard, -apple-system, sans-serif" font-size="24" font-weight="400" fill="#6B7280" text-anchor="middle">
+      고향을 떠나 낯선 이국땅에서 꿈을 키우며
+    </text>
+    <text x="600" y="410" font-family="Pretendard, -apple-system, sans-serif" font-size="24" font-weight="400" fill="#6B7280" text-anchor="middle">
+      살아가는 이주민들과 함께 만듭니다
+    </text>
+
+    <!-- 하단 로고/아이콘 -->
+    <g transform="translate(560, 440)">
+      <circle cx="40" cy="40" r="35" fill="#531DA6" opacity="0.1"/>
+      <path d="M 40 25 L 40 55 M 25 40 L 55 40" stroke="#531DA6" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="40" cy="40" r="20" stroke="#531DA6" stroke-width="3" fill="none"/>
+    </g>
+  </g>
+
+  <!-- 하단 URL -->
+  <text x="600" y="585" font-family="Pretendard, -apple-system, sans-serif" font-size="20" font-weight="500" fill="white" text-anchor="middle" opacity="0.9">
+    withmigrant.or.kr
+  </text>
+</svg>
