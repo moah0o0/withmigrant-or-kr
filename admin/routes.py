@@ -225,7 +225,18 @@ def notices_attachment_delete(id, file_id):
     file_record = File.query.get_or_404(file_id)
 
     if file_record in notice.attachments:
+        # 1. 관계 끊기
         notice.attachments.remove(file_record)
+
+        # 2. 실제 파일 삭제
+        import os
+        from config import Config
+        filepath = os.path.join(Config.DIST_DIR, 'uploads', file_record.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        # 3. File 레코드 삭제
+        db.session.delete(file_record)
         db.session.commit()
 
     if request.headers.get('HX-Request'):
@@ -240,18 +251,25 @@ def notices_delete(id):
     """공지사항 삭제"""
     notice = Notice.query.get_or_404(id)
 
-    # 1. 첨부파일 삭제
-    from .utils import delete_file_record
-    for attachment in list(notice.attachments):
-        delete_file_record(attachment)
+    # 1. 첨부파일 삭제 (관계 끊고 파일 삭제)
+    import os
+    from config import Config
+    attachments_to_delete = list(notice.attachments)  # 복사
+    notice.attachments.clear()  # 관계 먼저 끊기
+
+    for attachment in attachments_to_delete:
+        # 실제 파일 삭제
+        filepath = os.path.join(Config.DIST_DIR, 'uploads', attachment.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        # File 레코드 삭제
+        db.session.delete(attachment)
 
     # 2. 본문 내 이미지 삭제
     from .utils import cleanup_all_content_images
     cleanup_all_content_images(notice.content)
 
     # 3. dist 폴더의 HTML 파일 삭제
-    import os
-    from config import Config
     html_path = os.path.join(Config.DIST_DIR, 'notice', f'{id}.html')
     if os.path.exists(html_path):
         os.remove(html_path)
@@ -454,22 +472,33 @@ def activities_delete(id):
     """활동후기 삭제"""
     activity = ActivityPost.query.get_or_404(id)
 
-    # 1. 첨부파일 삭제
-    from .utils import delete_file_record
-    for attachment in list(activity.attachments):
-        delete_file_record(attachment)
+    import os
+    from config import Config
+
+    # 1. 첨부파일 삭제 (관계 끊고 파일 삭제)
+    attachments_to_delete = list(activity.attachments)  # 복사
+    activity.attachments.clear()  # 관계 먼저 끊기
+
+    for attachment in attachments_to_delete:
+        # 실제 파일 삭제
+        filepath = os.path.join(Config.DIST_DIR, 'uploads', attachment.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        # File 레코드 삭제
+        db.session.delete(attachment)
 
     # 2. 썸네일 파일 삭제
     if activity.thumbnail:
-        delete_file_record(activity.thumbnail)
+        filepath = os.path.join(Config.DIST_DIR, 'uploads', activity.thumbnail.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        db.session.delete(activity.thumbnail)
 
     # 3. 본문 내 이미지 삭제
     from .utils import cleanup_all_content_images
     cleanup_all_content_images(activity.content)
 
     # 4. dist 폴더의 HTML 파일 삭제
-    import os
-    from config import Config
     html_path = os.path.join(Config.DIST_DIR, 'activity', f'{id}.html')
     if os.path.exists(html_path):
         os.remove(html_path)
@@ -494,7 +523,18 @@ def activities_attachment_delete(id, file_id):
     file_record = File.query.get_or_404(file_id)
 
     if file_record in activity.attachments:
+        # 1. 관계 끊기
         activity.attachments.remove(file_record)
+
+        # 2. 실제 파일 삭제
+        import os
+        from config import Config
+        filepath = os.path.join(Config.DIST_DIR, 'uploads', file_record.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        # 3. File 레코드 삭제
+        db.session.delete(file_record)
         db.session.commit()
 
     if request.headers.get('HX-Request'):
