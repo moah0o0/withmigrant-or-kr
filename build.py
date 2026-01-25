@@ -125,6 +125,26 @@ def get_site_context():
     }
 
 
+def normalize_seo(seo):
+    """
+    SEO 설정 정규화 - og_image를 절대 URL로 변환
+    Args:
+        seo: SEO 설정 딕셔너리
+    Returns:
+        정규화된 SEO 딕셔너리
+    """
+    normalized = seo.copy()
+
+    # og_image를 절대 URL로 변환
+    if 'og_image' in normalized:
+        og_image = normalized['og_image']
+        # 상대 경로인 경우에만 STATIC_DOMAIN 추가
+        if og_image and not og_image.startswith(('http://', 'https://')):
+            normalized['og_image'] = Config.STATIC_DOMAIN + og_image
+
+    return normalized
+
+
 def build_index(app):
     """메인 페이지 빌드"""
     with app.app_context():
@@ -145,7 +165,7 @@ def build_index(app):
             .order_by(DonationArea.display_order).all()
 
         # SEO 설정
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('index', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('index', {})})
 
         html = render_template('ssg/index.html',
             **ctx,
@@ -184,7 +204,7 @@ def build_intro(app):
         operating_hours = OperatingHours.query.filter_by(is_active=True).order_by(OperatingHours.display_order).all()
         office_info = OfficeInfo.get()
 
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('intro', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('intro', {})})
 
         html = render_template('ssg/intro.html',
             **ctx,
@@ -211,7 +231,7 @@ def build_notice_list(app):
         total = Notice.query.count()
         total_pages = ceil(total / per_page) if total > 0 else 1
 
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('notice_list', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('notice_list', {})})
 
         for page in range(1, total_pages + 1):
             notices = Notice.query.order_by(Notice.is_pinned.desc(), Notice.created_at.desc())\
@@ -255,11 +275,11 @@ def build_notice_detail(app):
             prev_notice = notices[i + 1] if i + 1 < len(notices) else None
             next_notice = notices[i - 1] if i > 0 else None
 
-            seo = {
+            seo = normalize_seo({
                 **Config.SEO_DEFAULTS,
                 'title': notice.title,
                 'description': strip_html_tags(notice.content)[:160] if notice.content else '',
-            }
+            })
 
             html = render_template('ssg/notice_detail.html',
                 **ctx,
@@ -284,7 +304,7 @@ def build_activity_list(app):
         categories = ActivityCategory.query.filter_by(is_active=True)\
             .order_by(ActivityCategory.display_order).all()
 
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('activity_list', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('activity_list', {})})
 
         # 전체 목록
         total = ActivityPost.query.count()
@@ -379,12 +399,12 @@ def build_activity_detail(app):
                     ActivityPost.id != post.id
                 ).order_by(ActivityPost.created_at.desc()).limit(3).all()
 
-            seo = {
+            seo = normalize_seo({
                 **Config.SEO_DEFAULTS,
                 'title': post.title,
                 'description': strip_html_tags(post.content)[:160] if post.content else '',
                 'og_image': post.image_url if post.image_url else Config.SEO_DEFAULTS['og_image'],
-            }
+            })
 
             html = render_template('ssg/activity_detail.html',
                 **ctx,
@@ -409,7 +429,7 @@ def build_newsletter_list(app):
         total = Newsletter.query.count()
         total_pages = ceil(total / per_page) if total > 0 else 1
 
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('newsletter_list', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('newsletter_list', {})})
 
         for page in range(1, total_pages + 1):
             newsletters = Newsletter.query.order_by(Newsletter.published_at.desc())\
@@ -452,11 +472,11 @@ def build_newsletter_detail(app):
             prev_newsletter = newsletters[i + 1] if i + 1 < len(newsletters) else None
             next_newsletter = newsletters[i - 1] if i > 0 else None
 
-            seo = {
+            seo = normalize_seo({
                 **Config.SEO_DEFAULTS,
                 'title': newsletter.title,
                 'description': newsletter.description or '',
-            }
+            })
 
             html = render_template('ssg/newsletter_detail.html',
                 **ctx,
@@ -485,7 +505,7 @@ def build_donation(app):
         donation_usages = DonationUsage.query.filter_by(is_active=True)\
             .order_by(DonationUsage.display_order).all()
 
-        seo = {**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('donation', {})}
+        seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('donation', {})})
 
         html = render_template('ssg/donation.html',
             **ctx,
@@ -506,11 +526,11 @@ def build_donation_complete(app):
     with app.app_context():
         ctx = get_site_context()
 
-        seo = {
+        seo = normalize_seo({
             **Config.SEO_DEFAULTS,
             'title': '후원 신청 완료',
             'description': '양산외국인노동자의집 후원 신청이 완료되었습니다. 소중한 마음에 진심으로 감사드립니다.',
-        }
+        })
 
         html = render_template('donation_complete.html',
             **ctx,

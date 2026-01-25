@@ -240,13 +240,23 @@ def notices_delete(id):
     """공지사항 삭제"""
     notice = Notice.query.get_or_404(id)
 
-    # dist 폴더의 HTML 파일 삭제
+    # 1. 첨부파일 삭제
+    from .utils import delete_file_record
+    for attachment in list(notice.attachments):
+        delete_file_record(attachment)
+
+    # 2. 본문 내 이미지 삭제
+    from .utils import cleanup_all_content_images
+    cleanup_all_content_images(notice.content)
+
+    # 3. dist 폴더의 HTML 파일 삭제
     import os
     from config import Config
     html_path = os.path.join(Config.DIST_DIR, 'notice', f'{id}.html')
     if os.path.exists(html_path):
         os.remove(html_path)
 
+    # 4. DB에서 게시물 삭제
     db.session.delete(notice)
     db.session.commit()
 
@@ -444,13 +454,27 @@ def activities_delete(id):
     """활동후기 삭제"""
     activity = ActivityPost.query.get_or_404(id)
 
-    # dist 폴더의 HTML 파일 삭제
+    # 1. 첨부파일 삭제
+    from .utils import delete_file_record
+    for attachment in list(activity.attachments):
+        delete_file_record(attachment)
+
+    # 2. 썸네일 파일 삭제
+    if activity.thumbnail:
+        delete_file_record(activity.thumbnail)
+
+    # 3. 본문 내 이미지 삭제
+    from .utils import cleanup_all_content_images
+    cleanup_all_content_images(activity.content)
+
+    # 4. dist 폴더의 HTML 파일 삭제
     import os
     from config import Config
     html_path = os.path.join(Config.DIST_DIR, 'activity', f'{id}.html')
     if os.path.exists(html_path):
         os.remove(html_path)
 
+    # 5. DB에서 게시물 삭제
     db.session.delete(activity)
     db.session.commit()
 
@@ -600,13 +624,18 @@ def newsletters_delete(id):
     """소식지 삭제"""
     newsletter = Newsletter.query.get_or_404(id)
 
-    # dist 폴더의 HTML 파일 삭제
+    # 1. 본문 내 이미지 삭제
+    from .utils import cleanup_all_content_images
+    cleanup_all_content_images(newsletter.html_content)
+
+    # 2. dist 폴더의 HTML 파일 삭제
     import os
     from config import Config
     html_path = os.path.join(Config.DIST_DIR, 'newsletter', f'{id}.html')
     if os.path.exists(html_path):
         os.remove(html_path)
 
+    # 3. DB에서 게시물 삭제
     db.session.delete(newsletter)
     db.session.commit()
 

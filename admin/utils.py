@@ -191,6 +191,66 @@ def cleanup_orphaned_images(old_content, new_content):
     return deleted_count
 
 
+def delete_file_record(file_record):
+    """
+    File 레코드와 실제 파일 삭제
+    Args:
+        file_record: File 객체
+    Returns: 성공 여부 (bool)
+    """
+    if not file_record:
+        return False
+
+    try:
+        # 실제 파일 삭제
+        filepath = os.path.join(current_app.root_path, 'dist', 'uploads', file_record.filename)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        # DB 레코드 삭제
+        db.session.delete(file_record)
+        return True
+    except Exception as e:
+        print(f"파일 삭제 실패: {file_record.filename} - {e}")
+        return False
+
+
+def cleanup_all_content_images(content):
+    """
+    콘텐츠 내 모든 이미지 삭제 (게시물 삭제 시 사용)
+    Args:
+        content: HTML 콘텐츠
+    Returns: 삭제된 파일 수
+    """
+    if not content:
+        return 0
+
+    # 모든 이미지 URL 추출
+    image_urls = extract_image_urls(content)
+    deleted_count = 0
+
+    for url in image_urls:
+        # URL에서 파일명 추출
+        filename = url.replace('/uploads/', '')
+
+        # 파일 경로
+        filepath = os.path.join(current_app.root_path, 'dist', 'uploads', filename)
+
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                deleted_count += 1
+
+                # File 레코드도 삭제
+                file_record = File.query.filter_by(filename=filename).first()
+                if file_record:
+                    db.session.delete(file_record)
+        except Exception as e:
+            print(f"이미지 삭제 실패: {filepath} - {e}")
+
+    return deleted_count
+
+
 def crawl_stibee_content(url):
     """
     Stibee 뉴스레터 URL에서 콘텐츠 크롤링
