@@ -51,4 +51,4 @@ temp/
 tmp/
 
 # 업로드 파일 (보안상 제외, 서버에서 직접 관리)
-# dist/uploads/
+dist/uploads/
