@@ -1,0 +1,59 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '사진 수정' if photo else '사진 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.hero_photos_list') }}" class="text-notion-text-secondary hover:text-notion-accent">메인 사진</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if photo else '추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="max-w-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '사진 수정' if photo else '사진 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.hero_photos_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">사진</label>
+            {% if photo and photo.url %}
+            <div class="mb-3">
+                <img src="{{ photo.url }}" alt="" class="w-full max-w-md rounded">
+            </div>
+            {% endif %}
+            <div class="space-y-3">
+                <input type="file" name="photo" accept="image/*"
+                       class="w-full text-sm text-notion-text-secondary file:mr-3 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-notion-sidebar file:text-notion-text hover:file:bg-notion-hover">
+                <div class="text-center text-xs text-notion-text-muted">또는</div>
+                <input type="url" name="image_url" value="{{ photo.image_url if photo and photo.image_url else '' }}"
+                       placeholder="이미지 URL" class="input-notion">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">설명</label>
+            <textarea name="description" rows="3" class="input-notion"
+                      placeholder="사진에 대한 설명 (선택)">{{ photo.description if photo else '' }}</textarea>
+        </div>
+
+        {% if photo %}
+        <div>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_active" {{ 'checked' if photo.is_active else '' }}
+                       class="w-4 h-4 text-notion-accent rounded border-notion-border">
+                <span class="text-sm text-notion-text">활성화 (메인에 표시)</span>
+            </label>
+        </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

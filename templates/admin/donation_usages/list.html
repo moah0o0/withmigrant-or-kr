@@ -1,0 +1,87 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}후원금 사용용도 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">함께하는 법</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">사용용도</span>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">후원금 사용용도 관리</h1>
+        <p class="text-sm text-notion-text-muted mt-1">후원안내 페이지에 표시되는 후원금 사용용도를 관리합니다.</p>
+    </div>
+</div>
+
+<div class="card-notion max-w-2xl">
+    <div class="p-4 border-b border-notion-border">
+        <h2 class="font-semibold text-notion-text">여러분의 후원회비는 이렇게 쓰여집니다</h2>
+    </div>
+    <div class="p-4">
+        <!-- 추가 폼 -->
+        <form method="POST" action="{{ url_for('admin.donation_usages_add') }}" class="flex gap-2 mb-4">
+            <input type="text" name="name" placeholder="사용용도 입력 (예: 이주민 상담 지원)" required
+                   class="input-notion flex-1">
+            <button type="submit" class="btn-notion btn-primary">추가</button>
+        </form>
+
+        <!-- 사용용도 목록 -->
+        <ul id="usages-list" class="space-y-2">
+            {% for usage in usages %}
+            <li class="flex items-center gap-2 p-3 bg-notion-sidebar rounded group" data-id="{{ usage.id }}">
+                <span class="cursor-move text-notion-text-muted drag-handle">⋮⋮</span>
+                <form method="POST" action="{{ url_for('admin.donation_usages_edit', id=usage.id) }}" class="flex-1 flex gap-2">
+                    <input type="text" name="name" value="{{ usage.name }}" required
+                           class="input-notion flex-1 text-sm">
+                    <button type="submit" class="btn-notion btn-secondary text-xs">저장</button>
+                </form>
+                <button onclick="deleteUsage({{ usage.id }})"
+                        class="text-xs text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">삭제</button>
+            </li>
+            {% else %}
+            <li class="text-sm text-notion-text-muted text-center py-4">등록된 사용용도가 없습니다.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<p class="text-xs text-notion-text-muted mt-4">항목을 드래그하여 순서를 변경할 수 있습니다.</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+const usagesList = document.getElementById('usages-list');
+if (usagesList && usagesList.querySelector('[data-id]')) {
+    new Sortable(usagesList, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: function() {
+            const order = [...usagesList.querySelectorAll('[data-id]')].map(el => el.dataset.id);
+            fetch('{{ url_for("admin.donation_usages_reorder") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order })
+            });
+        }
+    });
+}
+
+function deleteUsage(id) {
+    if (confirm('사용용도를 삭제하시겠습니까?')) {
+        fetch(`/donation-usages/${id}/delete`, { method: 'POST' })
+            .then(res => {
+                if (!res.ok) throw new Error('삭제 실패');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+    }
+}
+</script>
+{% endblock %}

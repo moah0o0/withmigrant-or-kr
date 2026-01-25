@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>후원신청서 - {{ donation.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #333;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 5mm;
+        }
+
+        /* 헤더 */
+        .header {
+            text-align: center;
+            margin-bottom: 4mm;
+        }
+
+        .slogan {
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 2mm;
+        }
+
+        .org-name {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .org-sub {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #2c5282;
+        }
+
+        .title {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 4mm 0;
+            text-align: center;
+            letter-spacing: 3mm;
+        }
+
+        .title-line {
+            width: 25mm;
+            height: 1px;
+            background: #333;
+            margin: 0 auto 3mm;
+        }
+
+        /* 테이블 */
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4mm;
+        }
+
+        .form-table th,
+        .form-table td {
+            border: 1px solid #333;
+            padding: 3mm 4mm;
+            vertical-align: middle;
+        }
+
+        .form-table th {
+            background: #f5f5f5;
+            font-weight: normal;
+            width: 22mm;
+            text-align: center;
+            font-size: 9pt;
+        }
+
+        .form-table td {
+            text-align: left;
+            font-size: 9pt;
+        }
+
+        .form-table .value {
+            font-weight: 500;
+        }
+
+        .form-table .small-text {
+            font-size: 7pt;
+            color: #666;
+        }
+
+        .date-group {
+            display: inline-block;
+            line-height: 1.8;
+        }
+
+        .date-group .value {
+            font-size: 10pt;
+            font-weight: 600;
+            display: inline-block;
+            min-width: 8mm;
+            text-align: center;
+        }
+
+        .date-group span {
+            margin: 0 1mm;
+        }
+
+        /* 체크박스 */
+        .checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 1mm;
+            margin-right: 4mm;
+        }
+
+        .checkbox-box {
+            width: 3.5mm;
+            height: 3.5mm;
+            border: 1px solid #333;
+            display: inline-block;
+            text-align: center;
+            line-height: 3.5mm;
+            font-size: 7pt;
+        }
+
+        .checkbox-box.checked {
+            background: #333;
+            color: white;
+        }
+
+        /* 서명 영역 */
+        .signature-cell {
+            height: 20mm;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .signature-cell img {
+            max-height: 18mm;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* 정보동의 */
+        .consent-text {
+            font-size: 8pt;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        /* 푸터 */
+        .footer {
+            margin-top: 4mm;
+            padding-top: 3mm;
+            border-top: 1px solid #ccc;
+            font-size: 8pt;
+            color: #666;
+        }
+
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1mm;
+        }
+
+        /* 인쇄 모드 */
+            {
+            % if print_mode %
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #2c5282;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .print-btn:hover {
+            background: #1a365d;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+
+            {
+            % endif %
+        }
+    </style>
+</head>
+
+<body>
+    {% if print_mode %}
+    <button class="print-btn" onclick="window.print()">PDF로 저장 / 인쇄</button>
+    {% endif %}
+
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <p class="slogan">{{ site.slogan if site and site.slogan else '"차별 없이 평등한 사회를 만들어가고자 합니다."' }}</p>
+            <p class="org-name">{{ site.org_name if site else '(사)함께하는세상' }}</p>
+            <p class="org-sub">{{ site.site_name if site else '양산외국인노동자의집' }}</p>
+        </div>
+
+        <div class="title-line"></div>
+        <h1 class="title">후원신청서</h1>
+
+        <!-- 신청서 테이블 -->
+        <table class="form-table">
+            <tr>
+                <th>이&nbsp;&nbsp;&nbsp;&nbsp;름</th>
+                <td class="value">{{ donation.name }}</td>
+            </tr>
+            <tr>
+                <th>생년월일</th>
+                <td>
+                    <span class="date-group">
+                        <span class="value">{{ donation.birth_year or '' }}</span>년
+                        <span class="value">{{ '%02d'|format(donation.birth_month) if donation.birth_month else ''
+                            }}</span>월
+                        <span class="value">{{ '%02d'|format(donation.birth_day) if donation.birth_day else ''
+                            }}</span>일
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>주&nbsp;&nbsp;&nbsp;소</th>
+                <td class="value">{{ donation.address or '' }}</td>
+            </tr>
+            <tr>
+                <th>계좌번호</th>
+                <td>
+                    <span class="value">{{ donation.account_number or '' }}</span>
+                    <span style="margin-left: 5mm;">({{ donation.bank_name or '' }})</span>
+                </td>
+            </tr>
+            <tr>
+                <th>주민등록<br>번호</th>
+                <td>
+                    <span class="value">{{ donation.resident_number or '' }}</span>
+                    <span class="small-text" style="margin-left: 3mm;">※ 연말소득공제와 후원금 자동이체를 위해 사용되며 공개되지 않습니다.</span>
+                </td>
+            </tr>
+            <tr>
+                <th>연&nbsp;락&nbsp;처</th>
+                <td class="value">{{ donation.phone or '' }}</td>
+            </tr>
+            <tr>
+                <th>직&nbsp;&nbsp;&nbsp;업</th>
+                <td class="value">{{ donation.occupation or '' }}</td>
+            </tr>
+            <tr>
+                <th>월 약정<br>후원금</th>
+                <td>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.amount == 10000 else '' }}">{{ '✓' if
+                            donation.amount == 10000 else '' }}</span>1만원
+                    </span>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.amount == 20000 else '' }}">{{ '✓' if
+                            donation.amount == 20000 else '' }}</span>2만원
+                    </span>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.amount == 30000 else '' }}">{{ '✓' if
+                            donation.amount == 30000 else '' }}</span>3만원
+                    </span>
+                    <span class="checkbox">
+                        <span
+                            class="checkbox-box {{ 'checked' if donation.amount and donation.amount not in [10000, 20000, 30000] else '' }}">{{
+                            '✓' if donation.amount and donation.amount not in [10000, 20000, 30000] else ''
+                            }}</span>직접기입({{ '{:,}'.format(donation.amount) if donation.amount and donation.amount not
+                        in [10000, 20000, 30000] else '' }})원
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>후원금<br>출금일</th>
+                <td>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.withdrawal_date == 7 else '' }}">{{ '✓' if
+                            donation.withdrawal_date == 7 else '' }}</span>7일
+                    </span>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.withdrawal_date == 16 else '' }}">{{ '✓' if
+                            donation.withdrawal_date == 16 else '' }}</span>16일
+                    </span>
+                    <span class="checkbox">
+                        <span class="checkbox-box {{ 'checked' if donation.withdrawal_date == 26 else '' }}">{{ '✓' if
+                            donation.withdrawal_date == 26 else '' }}</span>26일
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>신청일</th>
+                <td>
+                    <span class="date-group">
+                        20<span class="value">{{ donation.created_at.strftime('%y') if donation.created_at else ''
+                            }}</span>년
+                        <span class="value">{{ '%02d'|format(donation.created_at.month) if donation.created_at else ''
+                            }}</span>월
+                        <span class="value">{{ '%02d'|format(donation.created_at.day) if donation.created_at else ''
+                            }}</span>일
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>서&nbsp;&nbsp;&nbsp;명</th>
+                <td class="signature-cell">
+                    {% if donation.signature %}
+                    <img src="{{ donation.signature }}" alt="서명">
+                    {% else %}
+                    <span style="color: #999;">(서명 없음)</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>정보공개<br>동의여부</th>
+                <td>
+                    <p class="consent-text">
+                        성명, 생년월일, 주소, 전화번호 등 수집된 항목은 용도(CMS 출금신청, 후원회원 관리)외의 목적으로 활용되지 않으며, 수집 및 이용 목적이 달성되면 지체 없이 파기됨을
+                        알려드립니다. 개인정보 이용에 동의하십니까?
+                    </p>
+                    <div style="margin-top: 2mm; text-align: center;">
+                        <span class="checkbox">
+                            <span class="checkbox-box {{ 'checked' if donation.privacy_consent else '' }}">{{ '✓' if
+                                donation.privacy_consent else '' }}</span>동의함
+                        </span>
+                        <span class="checkbox">
+                            <span class="checkbox-box {{ 'checked' if not donation.privacy_consent else '' }}">{{ '✓' if
+                                not donation.privacy_consent else '' }}</span>동의하지 않음
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- 푸터 -->
+        <div class="footer">
+            <div class="footer-row">
+                <span>주소: {{ site.address if site else '양산시 북안북7길 35, 1층' }}</span>
+                <span>전화: {{ site.tel if site else '055-388-0988' }}&nbsp;&nbsp;팩스: {{ site.fax if site else
+                    '055-366-0988' }}</span>
+            </div>
+            <div class="footer-row">
+                <span>이메일: {{ site.email if site else 'happysoli@hanmail.net' }}</span>
+                <span>홈페이지: https://withmigrant.or.kr</span>
+            </div>
+        </div>
+    </div>
+
+    {% if print_mode %}
+    <script>
+        // 페이지 로드 후 인쇄 다이얼로그 표시 (선택적)
+        // window.onload = function() { window.print(); }
+    </script>
+    {% endif %}
+</body>
+
+</html>

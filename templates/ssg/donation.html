@@ -1,0 +1,553 @@
+{% extends 'ssg/base.html' %}
+
+{% block title %}함께하기 - {{ site.site_name or '양산외국인노동자의집' }}{% endblock %}
+{% block canonical %}/donation.html{% endblock %}
+{% block og_url %}/donation.html{% endblock %}
+
+{% block content %}
+<!-- DONATION HERO -->
+<section class="w-full bg-gradient-to-br from-primary via-primary-dark to-dark-900 py-20 md:py-28 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-30">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
+    </div>
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+        <div class="flex flex-col gap-5 text-white max-w-xl">
+            <h1 class="text-4xl md:text-5xl font-bold leading-tight font-display">함께하기</h1>
+            <p class="text-lg text-white/80 leading-relaxed">
+                {{ sponsorship.appeal_text if sponsorship else '(사)함께하는세상 양산외국인노동자의집은 여러분의 후원금과 자원활동으로 이뤄지고 있습니다.' }}
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- DONATION INFO -->
+<section class="w-full bg-light-200 py-16 md:py-24">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Volunteer Card -->
+            <div class="card-modern p-6 md:p-8">
+                <div class="flex flex-col gap-5">
+                    <div class="w-14 h-14 bg-light-200 rounded-2xl flex items-center justify-center">
+                        <svg width="28" height="28" viewBox="0 0 48 48" fill="none" class="text-primary">
+                            <circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="2" />
+                            <path d="M8 44C8 35.1634 15.1634 28 24 28C32.8366 28 40 35.1634 40 44" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-dark-800">자원활동</h2>
+                    <p class="text-sm text-dark-500 leading-relaxed">{{ sponsorship.volunteer_summary if sponsorship }}</p>
+                    <div class="pt-5 border-t border-light-300">
+                        <p class="text-xs font-medium text-dark-400 mb-3">참여 가능 분야</p>
+                        {% if volunteer_areas %}
+                        <ul class="flex flex-col gap-2">
+                            {% for area in volunteer_areas %}
+                            <li class="flex items-start gap-2 text-sm text-dark-600">
+                                <svg class="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                {{ area.name }}{% if area.description %}: {{ area.description }}{% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donation Card -->
+            <div class="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+                <div class="relative flex flex-col gap-5">
+                    <div class="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center">
+                        <svg width="28" height="28" viewBox="0 0 48 48" fill="none" class="text-white">
+                            <path d="M24 44C24 44 4 32 4 18C4 10 10 4 18 4C22.5 4 24 8 24 8C24 8 25.5 4 30 4C38 4 44 10 44 18C44 32 24 44 24 44Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-primary">후원</h2>
+                    <p class="text-sm text-dark-500 leading-relaxed">{{ sponsorship.donation_summary if sponsorship }}</p>
+                    <div class="pt-5 border-t border-primary/20">
+                        <p class="text-xs font-medium text-dark-400 mb-3">후원 분야</p>
+                        {% if donation_areas %}
+                        <ul class="flex flex-col gap-2">
+                            {% for area in donation_areas %}
+                            <li class="flex items-center gap-2 text-sm text-dark-600">
+                                <svg class="w-4 h-4 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                                {{ area.name }}{% if area.description %}: {{ area.description }}{% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    <div class="mt-2 p-4 bg-white/80 rounded-xl">
+                        <p class="text-xs font-medium text-dark-400 mb-1">후원계좌</p>
+                        <p class="text-lg font-bold text-primary">{{ site.bank_name or '농협' }} {{ site.bank_account or '301-0135-5765-11' }}</p>
+                        <p class="text-xs text-dark-400">예금주: {{ site.bank_holder or site.org_name or '(사)함께하는세상' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if donation_usages %}
+        <div class="mt-8 card-modern p-6 md:p-8">
+            <h3 class="text-lg font-bold text-dark-800 mb-4">여러분의 후원회비는 이렇게 쓰여집니다</h3>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {% for usage in donation_usages %}
+                <li class="flex items-start gap-2 text-sm text-dark-600">
+                    <span class="text-primary flex-shrink-0">○</span>
+                    {{ usage.name }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- DONATION FORM -->
+<section class="w-full bg-white py-16 md:py-24" id="donation-form-section">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl md:text-3xl font-bold text-dark-800 mb-3">후원회원이 되어 주세요!</h2>
+            <p class="text-sm text-dark-500">CMS 후원을 하시면 은행에 가셔야 하는 번거로움을 줄일 수 있습니다.</p>
+        </div>
+
+        <!-- Form submits via JavaScript -->
+        <form id="donation-form" class="card-modern p-6 md:p-8">
+            <!-- Section 1: 기본 정보 -->
+            <div class="mb-8 pb-8 border-b border-light-300">
+                <h3 class="text-base font-semibold text-dark-800 mb-5">기본 정보</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">이름<span class="text-red-500 ml-0.5">*</span></label>
+                        <input type="text" name="name" class="form-input" placeholder="홍길동" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">생년월일<span class="text-red-500 ml-0.5">*</span></label>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="relative flex-1 min-w-[120px]">
+                                <input type="number" name="birth_year" class="form-input pr-10" placeholder="1990" min="1900" max="2025" required>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">년</span>
+                            </div>
+                            <div class="relative w-24">
+                                <input type="number" name="birth_month" class="form-input pr-10" placeholder="1" min="1" max="12" required>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">월</span>
+                            </div>
+                            <div class="relative w-24">
+                                <input type="number" name="birth_day" class="form-input pr-10" placeholder="1" min="1" max="31" required>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">일</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">주소<span class="text-red-500 ml-0.5">*</span></label>
+                        <input type="text" name="address" class="form-input" placeholder="주소를 입력해주세요" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">계좌번호<span class="text-red-500 ml-0.5">*</span></label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="flex-1">
+                                <input type="text" name="account_number" class="form-input" placeholder="계좌번호 입력" required>
+                            </div>
+                            <div class="sm:w-32">
+                                <input type="text" name="bank_name" class="form-input" placeholder="은행명" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">주민등록번호</label>
+                        <input type="text" name="resident_number" class="form-input" placeholder="연말소득공제와 후원금 자동이체를 위해 사용됩니다">
+                        <p class="mt-1 text-xs text-dark-400">연말소득공제와 후원금 자동이체를 위해 사용되며 공개되지 않습니다.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">연락처<span class="text-red-500 ml-0.5">*</span></label>
+                        <input type="tel" name="phone" class="form-input" placeholder="010-1234-5678" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-2">직업</label>
+                        <input type="text" name="occupation" class="form-input" placeholder="직업을 입력해주세요">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: 후원 정보 -->
+            <div class="mb-8 pb-8 border-b border-light-300">
+                <h3 class="text-base font-semibold text-dark-800 mb-5">후원 정보</h3>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-3">월 약정 후원금<span class="text-red-500 ml-0.5">*</span></label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                            {% for amount in [('10000', '10,000원'), ('20000', '20,000원'), ('30000', '30,000원')] %}
+                            <label class="amount-option">
+                                <input type="radio" name="amount" value="{{ amount[0] }}" class="sr-only peer" required>
+                                <span class="flex items-center justify-center px-3 py-3 bg-light-200 border border-light-300 rounded-xl text-sm font-medium text-dark-600 cursor-pointer transition-smooth peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary hover:border-light-400">{{ amount[1] }}</span>
+                            </label>
+                            {% endfor %}
+                            <label class="amount-option">
+                                <input type="radio" name="amount" value="other" id="amount-other" class="sr-only peer">
+                                <span class="flex items-center justify-center px-3 py-3 bg-light-200 border border-light-300 rounded-xl text-sm font-medium text-dark-600 cursor-pointer transition-smooth peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary hover:border-light-400">직접기입</span>
+                            </label>
+                        </div>
+                        <div id="amount-custom-wrapper" class="hidden">
+                            <div class="relative">
+                                <input type="text" id="amount-custom" name="amount-custom" class="form-input pr-8" placeholder="예: 50,000" inputmode="numeric">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">원</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-600 mb-3">후원금 출금일<span class="text-red-500 ml-0.5">*</span></label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="withdrawal_date" value="7" required class="w-4 h-4 text-primary border-light-400 focus:ring-primary">
+                                <span class="text-sm text-dark-600 group-hover:text-dark-800 transition-smooth">7일</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="withdrawal_date" value="16" class="w-4 h-4 text-primary border-light-400 focus:ring-primary">
+                                <span class="text-sm text-dark-600 group-hover:text-dark-800 transition-smooth">16일</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="withdrawal_date" value="26" class="w-4 h-4 text-primary border-light-400 focus:ring-primary">
+                                <span class="text-sm text-dark-600 group-hover:text-dark-800 transition-smooth">26일</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: 신청일/서명 -->
+            <div class="mb-8 pb-8 border-b border-light-300">
+                <h3 class="text-base font-semibold text-dark-800 mb-5">신청일/서명</h3>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-dark-600 mb-2">신청일</label>
+                    <div class="flex flex-wrap gap-2 max-w-sm">
+                        <div class="relative flex-1 min-w-[120px]">
+                            <input type="number" name="apply_year" class="form-input pr-10 bg-light-100 text-dark-500 cursor-not-allowed" readonly>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">년</span>
+                        </div>
+                        <div class="relative w-24">
+                            <input type="number" name="apply_month" class="form-input pr-10 bg-light-100 text-dark-500 cursor-not-allowed" readonly>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">월</span>
+                        </div>
+                        <div class="relative w-24">
+                            <input type="number" name="apply_day" class="form-input pr-10 bg-light-100 text-dark-500 cursor-not-allowed" readonly>
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark-400">일</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-dark-600 mb-2">서명<span class="text-red-500 ml-0.5">*</span></label>
+                    <p class="text-xs text-dark-500 mb-3">아래 영역에 서명해 주세요.</p>
+                    <div class="relative">
+                        <div class="bg-light-200 border border-light-300 rounded-xl overflow-hidden" id="signature-container">
+                            <canvas id="signature-canvas" class="w-full touch-none cursor-crosshair bg-light-100" style="height: 160px;"></canvas>
+                        </div>
+                        <div id="signature-placeholder" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <p class="text-dark-400 text-sm">여기에 서명해 주세요</p>
+                        </div>
+                        <input type="hidden" name="signature" id="signature-data" required>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button type="button" id="clear-signature" class="flex items-center gap-1.5 px-3 py-2 bg-light-200 text-dark-500 text-xs font-medium rounded-lg hover:bg-light-300 transition-smooth">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            지우기
+                        </button>
+                        <button type="button" id="undo-signature" class="flex items-center gap-1.5 px-3 py-2 bg-light-200 text-dark-500 text-xs font-medium rounded-lg hover:bg-light-300 transition-smooth">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                            </svg>
+                            되돌리기
+                        </button>
+                    </div>
+                    <p id="signature-error" class="hidden mt-2 text-xs text-red-500">서명을 입력해 주세요.</p>
+                </div>
+            </div>
+
+            <!-- Section 4: 개인정보 동의 -->
+            <div class="mb-8 pb-8 border-b border-light-300">
+                <h3 class="text-base font-semibold text-dark-800 mb-5">정보공개 동의여부</h3>
+                <div class="bg-light-200 rounded-xl p-4 mb-4">
+                    <p class="text-xs text-dark-500 leading-relaxed">
+                        성명, 생년월일, 주소, 전화번호 등 수집된 항목은 용도(CMS 출금신청, 후원회원 관리)외의 목적으로 활용되지 않으며,
+                        수집 및 이용 목적이 달성되면 지체 없이 파기됨을 알려드립니다. 개인정보 이용에 동의하십니까?
+                    </p>
+                </div>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="privacy_consent" value="agree" required class="w-4 h-4 text-primary border-light-400 focus:ring-primary">
+                        <span class="text-sm text-dark-600 group-hover:text-dark-800 transition-smooth">동의함</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="privacy_consent" value="disagree" class="w-4 h-4 text-primary border-light-400 focus:ring-primary">
+                        <span class="text-sm text-dark-600 group-hover:text-dark-800 transition-smooth">동의하지 않음</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-light-300">
+                <button type="button" onclick="history.back()" class="flex-1 sm:flex-none px-6 py-3.5 btn-outline">취소</button>
+                <button type="submit" class="flex-1 btn-primary py-3.5">후원 신청하기</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const amountOther = document.getElementById('amount-other');
+    const amountCustom = document.getElementById('amount-custom');
+    const amountCustomWrapper = document.getElementById('amount-custom-wrapper');
+
+    document.querySelectorAll('input[name="amount"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            if (this.value === 'other') {
+                amountCustomWrapper.classList.remove('hidden');
+                amountCustom.focus();
+            } else {
+                amountCustomWrapper.classList.add('hidden');
+            }
+        });
+    });
+
+    if (amountCustom) {
+        // 숫자 포맷팅 함수 (천 단위 쉼표)
+        function formatNumber(value) {
+            // 숫자만 추출
+            const num = value.replace(/[^\d]/g, '');
+            // 천 단위 쉼표 추가
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 숫자만 추출하는 함수
+        function getNumericValue(value) {
+            return value.replace(/[^\d]/g, '');
+        }
+
+        amountCustom.addEventListener('input', function (e) {
+            const cursorPosition = this.selectionStart;
+            const oldValue = this.value;
+            const oldLength = oldValue.length;
+
+            // 포맷팅 적용
+            const formatted = formatNumber(this.value);
+            this.value = formatted;
+
+            // 실제 숫자 값을 라디오 버튼에 저장
+            const numericValue = getNumericValue(formatted);
+            amountOther.value = numericValue;
+
+            // 커서 위치 조정 (쉼표 추가로 인한 위치 변경 보정)
+            const newLength = formatted.length;
+            const diff = newLength - oldLength;
+            this.selectionStart = this.selectionEnd = cursorPosition + diff;
+        });
+
+        // 최소 금액 검증
+        amountCustom.addEventListener('blur', function () {
+            const numericValue = parseInt(getNumericValue(this.value)) || 0;
+            if (numericValue > 0 && numericValue < 1000) {
+                alert('최소 후원 금액은 1,000원입니다.');
+                this.value = '';
+                amountOther.value = '';
+            }
+        });
+    }
+
+    const today = new Date();
+    const applyYear = document.querySelector('input[name="apply_year"]');
+    const applyMonth = document.querySelector('input[name="apply_month"]');
+    const applyDay = document.querySelector('input[name="apply_day"]');
+    if (applyYear) applyYear.value = today.getFullYear();
+    if (applyMonth) applyMonth.value = today.getMonth() + 1;
+    if (applyDay) applyDay.value = today.getDate();
+
+    const canvas = document.getElementById('signature-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('signature-container');
+    const placeholder = document.getElementById('signature-placeholder');
+    const signatureData = document.getElementById('signature-data');
+    const signatureError = document.getElementById('signature-error');
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let paths = [];
+    let currentPath = [];
+
+    function resizeCanvas() {
+        const rect = container.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = 160 * dpr;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = '160px';
+        ctx.scale(dpr, dpr);
+        ctx.strokeStyle = '#171717';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        redrawPaths();
+    }
+
+    function redrawPaths() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        paths.forEach(path => {
+            if (path.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].x, path[i].y);
+            }
+            ctx.stroke();
+        });
+    }
+
+    function getCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function startDrawing(e) {
+        e.preventDefault();
+        isDrawing = true;
+        const coords = getCoordinates(e);
+        lastX = coords.x;
+        lastY = coords.y;
+        currentPath = [{ x: lastX, y: lastY }];
+        placeholder.classList.add('hidden');
+        signatureError.classList.add('hidden');
+        container.classList.add('border-primary');
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const coords = getCoordinates(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(coords.x, coords.y);
+        ctx.stroke();
+        currentPath.push({ x: coords.x, y: coords.y });
+        lastX = coords.x;
+        lastY = coords.y;
+    }
+
+    function stopDrawing() {
+        if (isDrawing && currentPath.length > 0) {
+            paths.push([...currentPath]);
+            signatureData.value = canvas.toDataURL('image/png');
+        }
+        isDrawing = false;
+        currentPath = [];
+    }
+
+    function clearSignature() {
+        paths = [];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        signatureData.value = '';
+        placeholder.classList.remove('hidden');
+        container.classList.remove('border-primary');
+    }
+
+    function undoSignature() {
+        if (paths.length > 0) {
+            paths.pop();
+            redrawPaths();
+            signatureData.value = paths.length > 0 ? canvas.toDataURL('image/png') : '';
+            if (paths.length === 0) {
+                placeholder.classList.remove('hidden');
+                container.classList.remove('border-primary');
+            }
+        }
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
+
+    document.getElementById('clear-signature').addEventListener('click', clearSignature);
+    document.getElementById('undo-signature').addEventListener('click', undoSignature);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // 폼 제출 처리
+    const donationForm = document.getElementById('donation-form');
+    if (!donationForm) {
+        console.error('donation-form 요소를 찾을 수 없습니다.');
+        return;
+    }
+
+    donationForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // 서명 검증
+        if (!signatureData.value) {
+            signatureError.classList.remove('hidden');
+            container.classList.add('border-red-500');
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // 제출 버튼 비활성화
+        const submitBtn = donationForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+        // FormData 생성
+        const formData = new FormData(donationForm);
+
+        try {
+            // API로 전송
+            const response = await fetch('{{ API_DOMAIN }}/donation/apply', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('후원 신청 중 오류가 발생했습니다.');
+            }
+
+            const result = await response.json();
+
+            // 성공 시 완료 페이지로 이동
+            if (result.success) {
+                // 신청 정보를 sessionStorage에 저장
+                sessionStorage.setItem('donationApplication', JSON.stringify({
+                    name: formData.get('name'),
+                    phone: formData.get('phone'),
+                    amount: formData.get('amount'),
+                    withdrawal_date: formData.get('withdrawal_date'),
+                    bank_name: formData.get('bank_name'),
+                    account_number: formData.get('account_number')
+                }));
+
+                // 완료 페이지로 이동
+                window.location.href = '/donation-complete.html';
+            } else {
+                throw new Error(result.error || '후원 신청 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('후원 신청 오류:', error);
+            alert(error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+});
+</script>
+{% endblock %}

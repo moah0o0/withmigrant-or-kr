@@ -1,0 +1,275 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '활동후기 수정' if activity else '새 활동후기' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">콘텐츠 관리</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.activities_list') }}" class="text-notion-text-secondary hover:text-notion-accent">활동후기</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if activity else '새 글' }}</span>
+{% endblock %}
+
+{% block head %}
+<style>
+    .thumbnail-preview {
+        max-width: 300px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="max-w-5xl">
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '활동후기 수정' if activity else '새 활동후기' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.activities_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+        <!-- 메인 콘텐츠 -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- 제목 -->
+            <div>
+                <label class="block text-sm font-medium text-notion-text mb-2">제목</label>
+                <input type="text" name="title" value="{{ activity.title if activity else '' }}"
+                       required placeholder="활동후기 제목을 입력하세요"
+                       class="input-notion text-lg">
+            </div>
+
+            <!-- 내용 (PocketBase 스타일 에디터) -->
+            <div>
+                <label class="block text-sm font-medium text-notion-text mb-2">내용</label>
+                {% set editor_content = activity.content if activity else '' %}
+                {% include 'admin/partials/editor.html' %}
+            </div>
+        </div>
+
+        <!-- 사이드바 -->
+        <div class="space-y-4">
+            <!-- 옵션 -->
+            <div class="card-notion p-4">
+                <h3 class="text-sm font-medium text-notion-text mb-3">옵션</h3>
+
+                <!-- 카테고리 -->
+                <div class="mb-4">
+                    <label class="block text-xs text-notion-text-muted mb-1">카테고리</label>
+                    <select name="category" class="input-notion text-sm">
+                        <option value="">카테고리 선택</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.name }}" {{ 'selected' if activity and activity.category == cat.name else '' }}>
+                            {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-xs text-notion-text-muted mt-1">
+                        <a href="{{ url_for('admin.categories_list') }}" class="text-notion-accent hover:underline">
+                            카테고리 관리 →
+                        </a>
+                    </p>
+                </div>
+
+                <!-- 작성일 -->
+                <div>
+                    <label class="block text-xs text-notion-text-muted mb-1">작성일</label>
+                    <input type="datetime-local" name="created_at"
+                           value="{{ activity.created_at.strftime('%Y-%m-%dT%H:%M') if activity and activity.created_at else '' }}"
+                           class="input-notion text-sm">
+                </div>
+            </div>
+
+            <!-- 썸네일 -->
+            <div class="card-notion p-4">
+                <h3 class="text-sm font-medium text-notion-text mb-3">대표 이미지</h3>
+
+                <!-- 현재 이미지 미리보기 -->
+                <div id="thumbnail-preview" class="mb-3 {{ 'hidden' if not activity or not activity.image_url else '' }}">
+                    {% if activity and activity.image_url %}
+                    <img src="{{ activity.image_url }}" alt="" class="thumbnail-preview">
+                    {% endif %}
+                </div>
+
+                <!-- 파일 업로드 -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-notion-text-muted mb-1">파일 업로드</label>
+                        <input type="file" name="thumbnail" accept="image/*"
+                               onchange="previewThumbnail(this)"
+                               class="w-full text-sm text-notion-text-secondary file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:bg-notion-sidebar file:text-notion-text hover:file:bg-notion-hover">
+                    </div>
+
+                    <div class="text-center text-xs text-notion-text-muted">또는</div>
+
+                    <div>
+                        <label class="block text-xs text-notion-text-muted mb-1">이미지 URL</label>
+                        <input type="url" name="thumbnail_url"
+                               value="{{ activity.thumbnail_url if activity and activity.thumbnail_url else '' }}"
+                               placeholder="https://..."
+                               class="input-notion text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 첨부파일 -->
+            <div class="card-notion p-4">
+                <h3 class="text-sm font-medium text-notion-text mb-3">첨부파일</h3>
+
+                <!-- 기존 첨부파일 -->
+                {% if activity and activity.attachments %}
+                <div class="space-y-2 mb-3" id="existing-attachments">
+                    {% for file in activity.attachments %}
+                    <div class="flex items-center gap-2 p-2 bg-notion-sidebar rounded text-sm" id="attachment-{{ file.id }}">
+                        <svg class="w-4 h-4 text-notion-text-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                        </svg>
+                        <a href="{{ file.url }}" target="_blank" class="text-notion-accent hover:underline truncate flex-1">
+                            {{ file.original_filename }}
+                        </a>
+                        <button type="button"
+                                onclick="deleteAttachment({{ activity.id }}, {{ file.id }})"
+                                class="text-red-500 hover:text-red-700 p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 새 파일 업로드 영역 -->
+                <div class="border-2 border-dashed border-notion-border rounded-lg p-4 text-center hover:border-notion-accent transition-colors cursor-pointer"
+                     onclick="document.getElementById('file-input').click()"
+                     ondragover="this.classList.add('border-notion-accent', 'bg-blue-50'); event.preventDefault()"
+                     ondragleave="this.classList.remove('border-notion-accent', 'bg-blue-50')"
+                     ondrop="handleFileDrop(event)">
+                    <svg class="w-8 h-8 mx-auto text-notion-text-muted mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-xs text-notion-text-muted">
+                        클릭하거나 파일을 드래그하세요
+                    </p>
+                </div>
+                <input type="file" id="file-input" name="attachments" multiple class="hidden"
+                       onchange="updateFileList(this)">
+
+                <!-- 선택된 파일 목록 -->
+                <div id="selected-files" class="space-y-2 mt-3"></div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedFiles = [];
+
+function previewThumbnail(input) {
+    const preview = document.getElementById('thumbnail-preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="" class="thumbnail-preview">`;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function deleteAttachment(activityId, fileId) {
+    if (confirm('첨부파일을 삭제하시겠습니까?')) {
+        fetch(`/activities/${activityId}/attachments/${fileId}/delete`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('attachment-' + fileId).remove();
+                } else {
+                    throw new Error('삭제 실패');
+                }
+            })
+            .catch(err => {
+                console.error('삭제 오류:', err);
+                alert('첨부파일 삭제 중 오류가 발생했습니다.');
+            });
+    }
+}
+
+function handleFileDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('border-notion-accent', 'bg-blue-50');
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        addFiles(files);
+    }
+}
+
+function updateFileList(input) {
+    addFiles(input.files);
+}
+
+function addFiles(files) {
+    const fileInput = document.getElementById('file-input');
+    const container = document.getElementById('selected-files');
+
+    for (const file of files) {
+        // 중복 체크
+        if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+            continue;
+        }
+        selectedFiles.push(file);
+    }
+
+    renderSelectedFiles();
+    updateFileInput();
+}
+
+function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderSelectedFiles();
+    updateFileInput();
+}
+
+function renderSelectedFiles() {
+    const container = document.getElementById('selected-files');
+    container.innerHTML = '';
+
+    selectedFiles.forEach((file, index) => {
+        const size = file.size < 1024 * 1024
+            ? (file.size / 1024).toFixed(1) + ' KB'
+            : (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded text-sm';
+        div.innerHTML = `
+            <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="truncate flex-1 text-notion-text">${file.name}</span>
+            <span class="text-notion-text-muted text-xs">${size}</span>
+            <button type="button" onclick="removeFile(${index})" class="text-red-500 hover:text-red-700 p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function updateFileInput() {
+    const fileInput = document.getElementById('file-input');
+    const dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
+}
+</script>
+{% endblock %}

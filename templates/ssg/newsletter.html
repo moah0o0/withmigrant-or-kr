@@ -1,0 +1,75 @@
+{% extends 'ssg/base.html' %}
+
+{% block title %}소식지 - {{ site.site_name or '양산외국인노동자의집' }}{% endblock %}
+{% block canonical %}/newsletter/{% endblock %}
+{% block og_url %}/newsletter/{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-dark-800 py-12 md:py-16">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">소식지 '사람이 사람에게'</h1>
+            <p class="text-base text-white/70 max-w-xl mx-auto">더 많은 사람들이 이주민과 더불어 살아갈 수 있도록, 이주민 인권 문제에 관심을 가지고 참여할 수 있기를</p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="bg-light-100 py-10 md:py-14">
+    <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
+        {% if pagination.items %}
+        <div class="space-y-4">
+            {% for nl in pagination.items %}
+            <article class="bg-white rounded-lg border border-light-300 hover:border-primary/30 hover:shadow-sm transition-all">
+                <div class="p-5 flex items-start justify-between gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-xs text-dark-400 font-medium">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-dark-800 mb-1 line-clamp-1">
+                            <a href="/newsletter/{{ nl.id }}.html" class="hover:text-primary transition-colors">{{ nl.title }}</a>
+                        </h3>
+                        {% if nl.description %}<p class="text-sm text-dark-500 line-clamp-2">{{ nl.description }}</p>{% endif %}
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <a href="/newsletter/{{ nl.id }}.html" class="px-4 py-2 bg-dark-800 hover:bg-dark-700 text-white text-sm font-medium rounded-lg transition-colors">읽기</a>
+                        {% if nl.external_url %}
+                        <a href="{{ nl.external_url }}" target="_blank" rel="noopener noreferrer"
+                           class="w-10 h-10 flex items-center justify-center border border-light-300 hover:border-primary hover:text-primary rounded-lg text-dark-400 transition-colors" title="원본 보기">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 bg-white rounded-lg border border-light-300">
+            <div class="text-4xl mb-4">📬</div>
+            <h3 class="text-lg font-semibold text-dark-800 mb-2">등록된 소식지가 없습니다</h3>
+            <p class="text-dark-500">새로운 소식지가 곧 발행될 예정입니다.</p>
+        </div>
+        {% endif %}
+
+        {% if pagination.pages > 1 %}
+        <div class="flex items-center justify-center gap-2 mt-10">
+            {% if pagination.has_prev %}
+            <a href="{% if pagination.prev_num == 1 %}/newsletter/{% else %}/newsletter/page/{{ pagination.prev_num }}.html{% endif %}"
+               class="px-4 py-2 bg-white border border-light-300 rounded-lg text-dark-600 hover:bg-light-100 transition-colors">← 이전</a>
+            {% endif %}
+            <span class="px-4 text-sm text-dark-500">{{ pagination.page }} / {{ pagination.pages }}</span>
+            {% if pagination.has_next %}
+            <a href="/newsletter/page/{{ pagination.next_num }}.html"
+               class="px-4 py-2 bg-white border border-light-300 rounded-lg text-dark-600 hover:bg-light-100 transition-colors">다음 →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

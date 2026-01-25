@@ -1,0 +1,47 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '항목 수정' if item else '항목 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.history_list') }}" class="text-notion-text-secondary hover:text-notion-accent">연혁</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ section.subtitle }}</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if item else '추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '연혁 항목 수정' if item else '연혁 항목 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.history_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div class="bg-notion-sidebar p-3 rounded-lg text-sm">
+            📁 섹션: <strong>{{ section.subtitle }}</strong>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">연도</label>
+            <input type="number" name="year" value="{{ item.year if item else '' }}"
+                   placeholder="예: 2003"
+                   class="input-notion w-32">
+            <p class="text-xs text-notion-text-muted mt-1">비워두면 연도 없이 표시됩니다.</p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">내용 *</label>
+            <textarea name="content" rows="4" required class="input-notion"
+                      placeholder="예: 양산외국인노동자의집 개소">{{ item.content if item else '' }}</textarea>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,845 @@
+{#
+    PocketBase 스타일 WYSIWYG 에디터 컴포넌트
+
+    사용법:
+    {% include 'admin/partials/editor.html' with context %}
+
+    필요 변수:
+    - editor_id: 에디터 고유 ID (기본값: 'editor')
+    - editor_name: input name (기본값: 'content')
+    - editor_content: 초기 콘텐츠 (기본값: '')
+    - editor_placeholder: placeholder 텍스트 (기본값: '내용을 입력하세요...')
+#}
+
+{% set eid = editor_id|default('editor') %}
+{% set ename = editor_name|default('content') %}
+{% set econtent = editor_content|default('') %}
+{% set epholder = editor_placeholder|default('내용을 입력하세요...') %}
+
+<style>
+/* PocketBase 스타일 에디터 */
+.pb-editor-wrapper {
+    border: 1px solid #e9e9e7;
+    border-radius: 0.5rem;
+    background: white;
+    overflow: hidden;
+}
+
+.pb-editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 8px;
+    background: #f7f6f3;
+    border-bottom: 1px solid #e9e9e7;
+}
+
+.pb-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.pb-toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: #d1d1d0;
+    margin: 0 6px;
+}
+
+.pb-toolbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #37352f;
+    transition: all 0.15s;
+}
+
+.pb-toolbar-btn:hover {
+    background: #e9e9e7;
+}
+
+.pb-toolbar-btn.active {
+    background: #d1d1d0;
+}
+
+.pb-toolbar-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.pb-toolbar-select {
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    font-size: 13px;
+    color: #37352f;
+    cursor: pointer;
+    outline: none;
+}
+
+.pb-toolbar-select:hover {
+    background: #e9e9e7;
+}
+
+.pb-toolbar-select:focus {
+    border-color: #2eaadc;
+}
+
+.pb-editor-content {
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #37352f;
+}
+
+.pb-editor-content:focus {
+    outline: none;
+}
+
+.pb-editor-content:empty:before {
+    content: attr(data-placeholder);
+    color: #9b9a97;
+    pointer-events: none;
+}
+
+/* 에디터 콘텐츠 스타일 */
+.pb-editor-content h1 { font-size: 1.875rem; font-weight: 700; margin: 1.5rem 0 0.75rem; line-height: 1.3; }
+.pb-editor-content h2 { font-size: 1.5rem; font-weight: 600; margin: 1.25rem 0 0.625rem; line-height: 1.3; }
+.pb-editor-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; line-height: 1.3; }
+.pb-editor-content p { margin: 0.5rem 0; }
+.pb-editor-content ul, .pb-editor-content ol { margin: 0.5rem 0; padding-left: 1.5rem; }
+.pb-editor-content ul { list-style-type: disc; }
+.pb-editor-content ol { list-style-type: decimal; }
+.pb-editor-content li { margin: 0.25rem 0; }
+.pb-editor-content a { color: #2eaadc; text-decoration: underline; }
+.pb-editor-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 0.75rem 0;
+    border-radius: 0.375rem;
+    cursor: pointer;
+}
+.pb-editor-content img:hover {
+    outline: 2px solid #2eaadc;
+}
+.pb-editor-content blockquote {
+    border-left: 3px solid #e9e9e7;
+    padding-left: 1rem;
+    margin: 0.75rem 0;
+    color: #787774;
+}
+.pb-editor-content pre {
+    background: #f7f6f3;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+.pb-editor-content code {
+    background: #f7f6f3;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+}
+.pb-editor-content hr {
+    border: none;
+    border-top: 1px solid #e9e9e7;
+    margin: 1.5rem 0;
+}
+.pb-editor-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+}
+.pb-editor-content th, .pb-editor-content td {
+    border: 1px solid #e9e9e7;
+    padding: 0.5rem;
+    text-align: left;
+}
+.pb-editor-content th {
+    background: #f7f6f3;
+    font-weight: 600;
+}
+
+/* 이미지 업로드 모달 */
+.pb-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.pb-modal-overlay.show {
+    display: flex;
+}
+
+.pb-modal {
+    background: white;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 480px;
+    margin: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.pb-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e9e9e7;
+}
+
+.pb-modal-title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.pb-modal-close {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #787774;
+}
+
+.pb-modal-close:hover {
+    background: #f7f6f3;
+}
+
+.pb-modal-body {
+    padding: 1.25rem;
+}
+
+.pb-tab-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.pb-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    background: #f7f6f3;
+    font-size: 0.875rem;
+    cursor: pointer;
+    color: #787774;
+}
+
+.pb-tab.active {
+    background: #2eaadc;
+    color: white;
+}
+
+.pb-upload-area {
+    border: 2px dashed #e9e9e7;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pb-upload-area:hover, .pb-upload-area.dragover {
+    border-color: #2eaadc;
+    background: #f0f9ff;
+}
+
+.pb-upload-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.75rem;
+    color: #9b9a97;
+}
+
+.pb-upload-text {
+    color: #787774;
+    font-size: 0.875rem;
+}
+
+.pb-upload-text strong {
+    color: #2eaadc;
+}
+</style>
+
+<div class="pb-editor-wrapper" id="{{ eid }}-wrapper">
+    <!-- 툴바 -->
+    <div class="pb-editor-toolbar">
+        <!-- 문단 형식 -->
+        <div class="pb-toolbar-group">
+            <select class="pb-toolbar-select" onchange="pbFormatBlock_{{ eid }}(this.value); this.value=''">
+                <option value="">Paragraph</option>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="p">Paragraph</option>
+                <option value="blockquote">Quote</option>
+                <option value="pre">Code Block</option>
+            </select>
+        </div>
+
+        <div class="pb-toolbar-divider"></div>
+
+        <!-- 정렬 -->
+        <div class="pb-toolbar-group">
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('justifyLeft')" title="왼쪽 정렬">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('justifyCenter')" title="가운데 정렬">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('justifyRight')" title="오른쪽 정렬">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('justifyFull')" title="양쪽 정렬">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="pb-toolbar-divider"></div>
+
+        <!-- 텍스트 서식 -->
+        <div class="pb-toolbar-group">
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('bold')" title="굵게 (Ctrl+B)">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('italic')" title="기울임 (Ctrl+I)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('underline')" title="밑줄 (Ctrl+U)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v6a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('strikeThrough')" title="취소선">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7 0-5.3.7-5.3 3.6 0 1.5 1.8 3.3 3.6 3.9h.2"/><path d="M8.7 15c.6 1.8 2.4 3.3 5.6 3.3 2.6 0 4.4-1.3 5.5-3.5"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            </button>
+        </div>
+
+        <div class="pb-toolbar-divider"></div>
+
+        <!-- 리스트 -->
+        <div class="pb-toolbar-group">
+            <button type="button" class="pb-toolbar-btn" onclick="pbInsertList_{{ eid }}('ul')" title="글머리 기호">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="5" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbInsertList_{{ eid }}('ol')" title="번호 매기기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="11" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/><path d="M4 5v3" stroke="currentColor" stroke-width="1.5"/><path d="M3 10h3M3 16h3M6 14v4" stroke="currentColor" stroke-width="1.5"/></svg>
+            </button>
+        </div>
+
+        <div class="pb-toolbar-divider"></div>
+
+        <!-- 삽입 -->
+        <div class="pb-toolbar-group">
+            <button type="button" class="pb-toolbar-btn" onclick="pbInsertLink_{{ eid }}()" title="링크 삽입">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbShowImageModal_{{ eid }}()" title="이미지 삽입">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbShowTableModal_{{ eid }}()" title="표 삽입">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbExec_{{ eid }}('insertHorizontalRule')" title="구분선">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>
+            </button>
+        </div>
+
+        <div class="pb-toolbar-divider"></div>
+
+        <!-- HTML 보기 -->
+        <div class="pb-toolbar-group">
+            <button type="button" class="pb-toolbar-btn" id="{{ eid }}-html-toggle" onclick="pbToggleHtml_{{ eid }}()" title="HTML 보기">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </button>
+            <button type="button" class="pb-toolbar-btn" onclick="pbToggleFullscreen_{{ eid }}()" title="전체 화면">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 에디터 영역 -->
+    <div id="{{ eid }}"
+         class="pb-editor-content"
+         contenteditable="true"
+         data-placeholder="{{ epholder }}"
+    >{{ econtent|safe }}</div>
+
+    <!-- HTML 에디터 (숨김) -->
+    <textarea id="{{ eid }}-html"
+              class="w-full min-h-[400px] p-4 font-mono text-sm hidden"
+              placeholder="HTML 코드를 입력하세요..."></textarea>
+
+    <!-- hidden input -->
+    <input type="hidden" name="{{ ename }}" id="{{ eid }}-input">
+</div>
+
+<!-- 이미지 업로드 모달 -->
+<div id="{{ eid }}-image-modal" class="pb-modal-overlay">
+    <div class="pb-modal">
+        <div class="pb-modal-header">
+            <span class="pb-modal-title">이미지 삽입</span>
+            <button type="button" class="pb-modal-close" onclick="pbHideImageModal_{{ eid }}()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="pb-modal-body">
+            <div class="pb-tab-group">
+                <button type="button" class="pb-tab active" onclick="pbSwitchTab_{{ eid }}('upload', this)">파일 업로드</button>
+                <button type="button" class="pb-tab" onclick="pbSwitchTab_{{ eid }}('url', this)">URL 입력</button>
+            </div>
+
+            <!-- 파일 업로드 탭 -->
+            <div id="{{ eid }}-tab-upload">
+                <div class="pb-upload-area"
+                     onclick="document.getElementById('{{ eid }}-file-input').click()"
+                     ondragover="this.classList.add('dragover'); event.preventDefault()"
+                     ondragleave="this.classList.remove('dragover')"
+                     ondrop="pbHandleDrop_{{ eid }}(event)">
+                    <div class="pb-upload-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+                    </div>
+                    <p class="pb-upload-text">
+                        클릭하거나 이미지를 드래그하세요<br>
+                        <strong>파일 찾아보기</strong>
+                    </p>
+                </div>
+                <input type="file" id="{{ eid }}-file-input" accept="image/*" class="hidden" onchange="pbUploadFile_{{ eid }}(this)">
+            </div>
+
+            <!-- URL 입력 탭 -->
+            <div id="{{ eid }}-tab-url" class="hidden">
+                <div class="space-y-3">
+                    <input type="url" id="{{ eid }}-url-input"
+                           class="input-notion"
+                           placeholder="https://example.com/image.jpg">
+                    <button type="button"
+                            class="btn-notion btn-primary w-full"
+                            onclick="pbInsertImageUrl_{{ eid }}()">
+                        삽입
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 링크 삽입 모달 -->
+<div id="{{ eid }}-link-modal" class="pb-modal-overlay">
+    <div class="pb-modal" style="max-width: 400px;">
+        <div class="pb-modal-header">
+            <span class="pb-modal-title">링크 삽입</span>
+            <button type="button" class="pb-modal-close" onclick="pbHideLinkModal_{{ eid }}()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="pb-modal-body">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">링크 텍스트</label>
+                    <input type="text" id="{{ eid }}-link-text"
+                           placeholder="표시할 텍스트"
+                           class="input-notion">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">URL</label>
+                    <input type="url" id="{{ eid }}-link-url"
+                           placeholder="https://example.com"
+                           class="input-notion">
+                </div>
+                <button type="button"
+                        class="btn-notion btn-primary w-full"
+                        onclick="pbInsertLinkConfirm_{{ eid }}()">
+                    삽입
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 표 삽입 모달 -->
+<div id="{{ eid }}-table-modal" class="pb-modal-overlay">
+    <div class="pb-modal" style="max-width: 360px;">
+        <div class="pb-modal-header">
+            <span class="pb-modal-title">표 삽입</span>
+            <button type="button" class="pb-modal-close" onclick="pbHideTableModal_{{ eid }}()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="pb-modal-body">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">행 수</label>
+                    <input type="number" id="{{ eid }}-table-rows" value="3" min="1" max="20"
+                           class="input-notion">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">열 수</label>
+                    <input type="number" id="{{ eid }}-table-cols" value="3" min="1" max="10"
+                           class="input-notion">
+                </div>
+                <div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="{{ eid }}-table-header" checked
+                               class="w-4 h-4 text-notion-accent rounded border-notion-border">
+                        <span class="text-sm text-notion-text">첫 번째 행을 헤더로 사용</span>
+                    </label>
+                </div>
+                <button type="button"
+                        class="btn-notion btn-primary w-full"
+                        onclick="pbInsertTable_{{ eid }}()">
+                    삽입
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const editorId = '{{ eid }}';
+    const editor = document.getElementById(editorId);
+    const hiddenInput = document.getElementById(editorId + '-input');
+    const htmlEditor = document.getElementById(editorId + '-html');
+    let isHtmlMode = false;
+
+    // 에디터 내용 저장
+    function saveContent() {
+        if (isHtmlMode) {
+            hiddenInput.value = htmlEditor.value;
+        } else {
+            hiddenInput.value = editor.innerHTML;
+        }
+    }
+
+    // 폼 제출 시 내용 저장
+    const form = editor.closest('form');
+    if (form) {
+        form.addEventListener('submit', saveContent);
+    }
+
+    // 에디터 변경 감지
+    editor.addEventListener('input', saveContent);
+    htmlEditor.addEventListener('input', saveContent);
+
+    // 이미지 붙여넣기 처리
+    editor.addEventListener('paste', async function(e) {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                if (file) {
+                    await uploadAndInsertImage(file);
+                }
+                return;
+            }
+        }
+
+        // HTML에서 base64 이미지 찾아서 업로드로 변환
+        setTimeout(async () => {
+            const images = editor.querySelectorAll('img[src^="data:image"]');
+            for (const img of images) {
+                const src = img.src;
+                try {
+                    const response = await fetch('/upload/image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: src })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        img.src = data.url;
+                    }
+                } catch (err) {
+                    console.error('이미지 업로드 오류:', err);
+                }
+            }
+            saveContent();
+        }, 100);
+    });
+
+    // 이미지 드롭 처리
+    editor.addEventListener('drop', async function(e) {
+        const files = e.dataTransfer?.files;
+        if (!files || files.length === 0) return;
+
+        for (const file of files) {
+            if (file.type.startsWith('image/')) {
+                e.preventDefault();
+                await uploadAndInsertImage(file);
+            }
+        }
+    });
+
+    // 파일 업로드 및 이미지 삽입
+    async function uploadAndInsertImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/upload/image', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                insertImageToEditor(data.url);
+            } else {
+                alert(data.error || '이미지 업로드 실패');
+            }
+        } catch (err) {
+            console.error('이미지 업로드 오류:', err);
+            alert('이미지 업로드 중 오류가 발생했습니다.');
+        }
+    }
+
+    // 에디터에 이미지 삽입 (포커스 문제 해결)
+    function insertImageToEditor(url) {
+        editor.focus();
+
+        // insertHTML 사용 (더 안정적)
+        const img = `<img src="${url}" alt="" style="max-width: 100%;">`;
+        document.execCommand('insertHTML', false, img);
+        saveContent();
+    }
+
+    // 전역 함수 정의
+    window['pbExec_' + editorId] = function(cmd, value = null) {
+        editor.focus();
+        document.execCommand(cmd, false, value);
+        saveContent();
+    };
+
+    window['pbFormatBlock_' + editorId] = function(tag) {
+        if (tag) {
+            editor.focus();
+            document.execCommand('formatBlock', false, '<' + tag + '>');
+            saveContent();
+        }
+    };
+
+    // 현재 선택된 텍스트 저장
+    let savedSelection = null;
+
+    function saveSelection() {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            savedSelection = sel.getRangeAt(0).cloneRange();
+        }
+    }
+
+    function restoreSelection() {
+        if (savedSelection) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedSelection);
+        }
+    }
+
+    window['pbInsertLink_' + editorId] = function() {
+        // 선택된 텍스트 저장
+        saveSelection();
+        const selectedText = window.getSelection().toString();
+
+        // 모달 열기
+        document.getElementById(editorId + '-link-text').value = selectedText;
+        document.getElementById(editorId + '-link-url').value = '';
+        document.getElementById(editorId + '-link-modal').classList.add('show');
+        document.getElementById(editorId + '-link-url').focus();
+    };
+
+    window['pbHideLinkModal_' + editorId] = function() {
+        document.getElementById(editorId + '-link-modal').classList.remove('show');
+    };
+
+    window['pbInsertLinkConfirm_' + editorId] = function() {
+        const text = document.getElementById(editorId + '-link-text').value.trim();
+        const url = document.getElementById(editorId + '-link-url').value.trim();
+
+        if (!url) {
+            alert('URL을 입력해주세요.');
+            return;
+        }
+
+        editor.focus();
+        restoreSelection();
+
+        if (text) {
+            // 텍스트와 함께 링크 삽입
+            const link = `<a href="${url}" target="_blank">${text}</a>`;
+            document.execCommand('insertHTML', false, link);
+        } else {
+            // 선택 영역에 링크 적용
+            document.execCommand('createLink', false, url);
+        }
+
+        saveContent();
+        window['pbHideLinkModal_' + editorId]();
+    };
+
+    window['pbShowImageModal_' + editorId] = function() {
+        document.getElementById(editorId + '-image-modal').classList.add('show');
+    };
+
+    window['pbHideImageModal_' + editorId] = function() {
+        document.getElementById(editorId + '-image-modal').classList.remove('show');
+    };
+
+    window['pbSwitchTab_' + editorId] = function(tab, btn) {
+        document.querySelectorAll('#' + editorId + '-image-modal .pb-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+
+        document.getElementById(editorId + '-tab-upload').classList.toggle('hidden', tab !== 'upload');
+        document.getElementById(editorId + '-tab-url').classList.toggle('hidden', tab !== 'url');
+    };
+
+    window['pbHandleDrop_' + editorId] = async function(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+
+        const files = e.dataTransfer?.files;
+        if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+            await uploadAndInsertImage(files[0]);
+            window['pbHideImageModal_' + editorId]();
+        }
+    };
+
+    window['pbUploadFile_' + editorId] = async function(input) {
+        if (input.files && input.files.length > 0) {
+            await uploadAndInsertImage(input.files[0]);
+            window['pbHideImageModal_' + editorId]();
+            input.value = '';
+        }
+    };
+
+    window['pbInsertImageUrl_' + editorId] = function() {
+        const url = document.getElementById(editorId + '-url-input').value.trim();
+        if (url) {
+            insertImageToEditor(url);
+            window['pbHideImageModal_' + editorId]();
+            document.getElementById(editorId + '-url-input').value = '';
+        }
+    };
+
+    window['pbInsertList_' + editorId] = function(type) {
+        editor.focus();
+
+        // 선택된 텍스트 가져오기
+        const selection = window.getSelection();
+        let selectedText = selection.toString().trim();
+
+        // 선택된 텍스트가 있으면 각 줄을 리스트 항목으로 변환
+        let listItems;
+        if (selectedText) {
+            const lines = selectedText.split('\n').filter(line => line.trim());
+            listItems = lines.map(line => `<li>${line.trim()}</li>`).join('');
+        } else {
+            listItems = '<li>항목</li>';
+        }
+
+        const listHtml = type === 'ul'
+            ? `<ul>${listItems}</ul>`
+            : `<ol>${listItems}</ol>`;
+
+        document.execCommand('insertHTML', false, listHtml);
+        saveContent();
+    };
+
+    window['pbShowTableModal_' + editorId] = function() {
+        document.getElementById(editorId + '-table-modal').classList.add('show');
+        document.getElementById(editorId + '-table-rows').focus();
+    };
+
+    window['pbHideTableModal_' + editorId] = function() {
+        document.getElementById(editorId + '-table-modal').classList.remove('show');
+    };
+
+    window['pbInsertTable_' + editorId] = function() {
+        const rows = parseInt(document.getElementById(editorId + '-table-rows').value) || 3;
+        const cols = parseInt(document.getElementById(editorId + '-table-cols').value) || 3;
+        const hasHeader = document.getElementById(editorId + '-table-header').checked;
+
+        let table = '<table><tbody>';
+        for (let i = 0; i < rows; i++) {
+            table += '<tr>';
+            for (let j = 0; j < cols; j++) {
+                if (hasHeader && i === 0) {
+                    table += '<th>헤더</th>';
+                } else {
+                    table += '<td>내용</td>';
+                }
+            }
+            table += '</tr>';
+        }
+        table += '</tbody></table>';
+
+        editor.focus();
+        document.execCommand('insertHTML', false, table);
+        saveContent();
+
+        window['pbHideTableModal_' + editorId]();
+    };
+
+    window['pbToggleHtml_' + editorId] = function() {
+        const toggleBtn = document.getElementById(editorId + '-html-toggle');
+        isHtmlMode = !isHtmlMode;
+
+        if (isHtmlMode) {
+            htmlEditor.value = editor.innerHTML;
+            editor.classList.add('hidden');
+            htmlEditor.classList.remove('hidden');
+            toggleBtn.classList.add('active');
+        } else {
+            editor.innerHTML = htmlEditor.value;
+            htmlEditor.classList.add('hidden');
+            editor.classList.remove('hidden');
+            toggleBtn.classList.remove('active');
+        }
+        saveContent();
+    };
+
+    window['pbToggleFullscreen_' + editorId] = function() {
+        const wrapper = document.getElementById(editorId + '-wrapper');
+        wrapper.classList.toggle('fixed');
+        wrapper.classList.toggle('inset-4');
+        wrapper.classList.toggle('z-50');
+        wrapper.classList.toggle('shadow-2xl');
+
+        if (wrapper.classList.contains('fixed')) {
+            editor.style.maxHeight = 'calc(100vh - 150px)';
+        } else {
+            editor.style.maxHeight = '600px';
+        }
+    };
+
+    // 초기 콘텐츠 저장
+    saveContent();
+})();
+</script>

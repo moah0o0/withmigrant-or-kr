@@ -1,0 +1,142 @@
+{% extends 'ssg/base.html' %}
+
+{% block title %}{{ newsletter.title }} - {{ site.site_name or '양산외국인노동자의집' }}{% endblock %}
+{% block canonical %}/newsletter/{{ newsletter.id }}.html{% endblock %}
+{% block og_url %}/newsletter/{{ newsletter.id }}.html{% endblock %}
+{% block og_title %}{{ newsletter.title }}{% endblock %}
+
+{% block head %}
+<style>
+.newsletter-content { overflow-x: auto; }
+.newsletter-content img { max-width: 100%; height: auto; border-radius: 0.75rem; }
+.newsletter-content table { max-width: 100%; }
+.newsletter-content .stb-container { max-width: 100% !important; margin: 0 auto; }
+.newsletter-content [style*="font-size"] { font-size: inherit !important; }
+.newsletter-content a { color: var(--color-primary) !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<article class="bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="pt-6 pb-4">
+            <a href="/newsletter/" class="inline-flex items-center gap-2 text-dark-500 hover:text-primary transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18L9 12L15 6"/></svg>
+                <span class="font-medium">목록으로</span>
+            </a>
+        </div>
+
+        <header class="pb-6 border-b border-light-200">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="px-3 py-1 bg-primary/10 text-primary text-sm font-bold rounded-full">{{ newsletter.published_at.strftime('%Y') if newsletter.published_at else '' }}년</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-black text-dark-800 leading-tight mb-4">{{ newsletter.title }}</h1>
+            {% if newsletter.description %}<p class="text-lg text-dark-500 leading-relaxed mb-6">{{ newsletter.description }}</p>{% endif %}
+            <div class="flex flex-wrap items-center gap-4 text-sm text-dark-400">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <span class="font-semibold text-dark-600">소식지</span>
+                </div>
+                <span class="w-1 h-1 rounded-full bg-dark-300"></span>
+                <time datetime="{{ newsletter.published_at.isoformat() if newsletter.published_at else '' }}">{{ newsletter.published_at.strftime('%Y년 %m월 %d일') if newsletter.published_at else '' }}</time>
+            </div>
+        </header>
+
+        <div class="py-10 md:py-12">
+            {% if newsletter.html_content %}
+            <div class="newsletter-content">{{ newsletter.html_content | safe }}</div>
+            {% elif newsletter.external_url %}
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full flex items-center justify-center">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-dark-800 mb-3">이 소식지는 외부 링크로 연결됩니다</h3>
+                <p class="text-dark-500 mb-8">원본 페이지에서 소식지 전체 내용을 확인하세요.</p>
+                <a href="{{ newsletter.external_url }}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-accent text-white font-bold rounded-full hover:shadow-lg hover:shadow-primary/30 transition-all">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    <span>외부에서 보기</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="text-center py-16 text-dark-400"><p class="text-lg">콘텐츠가 없습니다.</p></div>
+            {% endif %}
+        </div>
+
+        {% if newsletter.html_content and newsletter.external_url %}
+        <div class="py-8 border-t border-light-200">
+            <div class="flex justify-center">
+                <a href="{{ newsletter.external_url }}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-6 py-3 border-2 border-dark-200 hover:border-primary text-dark-600 hover:text-primary font-semibold rounded-full transition-all">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                    <span>원본 페이지에서 보기</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="py-8 border-t border-light-200">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-dark-400">공유하기</span>
+                    <button onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다.')"
+                            class="w-10 h-10 rounded-full bg-light-200 hover:bg-light-300 flex items-center justify-center transition-colors">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-500">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                    </button>
+                </div>
+                <a href="/newsletter/" class="px-6 py-3 bg-light-200 hover:bg-light-300 text-dark-600 font-semibold rounded-full transition-colors">목록으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+</article>
+
+<section class="bg-light-100 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% if prev_newsletter %}
+            <a href="/newsletter/{{ prev_newsletter.id }}.html" class="group flex items-center gap-4 p-6 bg-white rounded-2xl hover:shadow-lg transition-all">
+                <div class="w-12 h-12 rounded-full bg-light-200 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-accent group-hover:text-white flex items-center justify-center transition-all">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18L9 12L15 6"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-xs text-dark-400 block mb-1">이전 소식지</span>
+                    <span class="font-semibold text-dark-800 group-hover:text-primary truncate block transition-colors">{{ prev_newsletter.title }}</span>
+                </div>
+            </a>
+            {% else %}<div></div>{% endif %}
+
+            {% if next_newsletter %}
+            <a href="/newsletter/{{ next_newsletter.id }}.html" class="group flex items-center gap-4 p-6 bg-white rounded-2xl hover:shadow-lg transition-all md:flex-row-reverse md:text-right">
+                <div class="w-12 h-12 rounded-full bg-light-200 group-hover:bg-gradient-to-br group-hover:from-primary group-hover:to-accent group-hover:text-white flex items-center justify-center transition-all">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6L15 12L9 18"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="text-xs text-dark-400 block mb-1">다음 소식지</span>
+                    <span class="font-semibold text-dark-800 group-hover:text-primary truncate block transition-colors">{{ next_newsletter.title }}</span>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '섹션 수정' if section else '섹션 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">사이트 설정</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.history_list') }}" class="text-notion-text-secondary hover:text-notion-accent">연혁</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '섹션 수정' if section else '섹션 추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-2xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '연혁 섹션 수정' if section else '연혁 섹션 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.history_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">소제목 (시대 구분) *</label>
+            <input type="text" name="subtitle" value="{{ section.subtitle if section else '' }}"
+                   required placeholder="예: 창립기, 성장기, 도약기"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">요약 제목</label>
+            <input type="text" name="summary_title" value="{{ section.summary_title if section else '' }}"
+                   placeholder="예: 이주민과 함께 걸어온 30년"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">요약 설명</label>
+            <textarea name="summary" rows="3" class="input-notion"
+                      placeholder="이 시대에 대한 간략한 설명">{{ section.summary if section else '' }}</textarea>
+        </div>
+    </div>
+</form>
+{% endblock %}

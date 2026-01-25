@@ -1,0 +1,167 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '소식지 수정' if newsletter else '새 소식지' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">콘텐츠 관리</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.newsletters_list') }}" class="text-notion-text-secondary hover:text-notion-accent">소식지</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if newsletter else '새 소식지' }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl" x-data="newsletterForm()">
+    <!-- 크롤링 섹션 (새 등록 시에만) -->
+    {% if not newsletter %}
+    <div class="card-notion mb-6 p-5 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+        <h3 class="font-medium text-notion-text mb-3 flex items-center gap-2">
+            <span>🔗</span> Stibee에서 가져오기
+        </h3>
+        <div class="flex gap-3">
+            <input type="url" x-model="crawlUrl"
+                   placeholder="https://stibee.com/api/v1.0/emails/share/..."
+                   class="input-notion flex-1">
+            <button type="button" @click="crawlContent()"
+                    :disabled="crawling"
+                    class="btn-notion btn-primary whitespace-nowrap">
+                <span x-show="!crawling">자동 가져오기</span>
+                <span x-show="crawling">가져오는 중...</span>
+            </button>
+        </div>
+        <p x-show="crawlError" x-text="crawlError" class="text-sm text-red-500 mt-2"></p>
+        <p x-show="crawlSuccess" class="text-sm text-green-600 mt-2">✓ 내용을 가져왔습니다!</p>
+    </div>
+    {% endif %}
+
+    <!-- 폼 -->
+    <form method="POST">
+        <!-- 헤더 -->
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-xl font-semibold text-notion-text">
+                {{ '소식지 수정' if newsletter else '새 소식지' }}
+            </h1>
+            <div class="flex items-center gap-3">
+                <a href="{{ url_for('admin.newsletters_list') }}" class="btn-notion btn-secondary">취소</a>
+                <button type="submit" class="btn-notion btn-primary">저장</button>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- 메인 -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- 제목 -->
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">제목</label>
+                    <input type="text" name="title" x-model="title"
+                           required placeholder="소식지 제목"
+                           class="input-notion text-lg">
+                </div>
+
+                <!-- 설명 -->
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">설명 (요약)</label>
+                    <textarea name="description" x-model="description" rows="3"
+                              placeholder="소식지에 대한 간단한 설명"
+                              class="input-notion"></textarea>
+                </div>
+
+                <!-- HTML 콘텐츠 -->
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">
+                        HTML 콘텐츠
+                        <span class="text-notion-text-muted font-normal">(선택사항)</span>
+                    </label>
+                    <textarea name="html_content" x-model="htmlContent" rows="10"
+                              placeholder="소식지 HTML 내용 (Stibee에서 자동 가져오기 사용 시 자동 입력됩니다)"
+                              class="input-notion font-mono text-sm"></textarea>
+                    <p class="text-xs text-notion-text-muted mt-1">
+                        HTML을 입력하면 사이트에서 소식지 내용을 직접 볼 수 있습니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 사이드바 -->
+            <div class="space-y-6">
+                <!-- 발행일 -->
+                <div class="card-notion p-4">
+                    <label class="block text-sm font-medium text-notion-text mb-2">발행일</label>
+                    <input type="date" name="published_at" x-model="publishedAt"
+                           class="input-notion">
+                </div>
+
+                <!-- 원본 URL -->
+                <div class="card-notion p-4">
+                    <label class="block text-sm font-medium text-notion-text mb-2">원본 URL</label>
+                    <input type="url" name="external_url" x-model="externalUrl"
+                           placeholder="https://stibee.com/..."
+                           class="input-notion text-sm">
+                    <p class="text-xs text-notion-text-muted mt-1">
+                        Stibee 등 외부 링크
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function newsletterForm() {
+    return {
+        crawlUrl: '',
+        crawling: false,
+        crawlError: '',
+        crawlSuccess: false,
+
+        // 폼 필드
+        title: {{ (newsletter.title if newsletter and newsletter.title else "")|tojson }},
+        description: {{ (newsletter.description if newsletter and newsletter.description else "")|tojson }},
+        htmlContent: {{ (newsletter.html_content if newsletter and newsletter.html_content else "")|tojson }},
+        publishedAt: {{ (newsletter.published_at.strftime("%Y-%m-%d") if newsletter and newsletter.published_at else "")|tojson }},
+        externalUrl: {{ (newsletter.external_url if newsletter and newsletter.external_url else "")|tojson }},
+
+        async crawlContent() {
+            if (!this.crawlUrl) {
+                this.crawlError = 'URL을 입력해주세요.';
+                return;
+            }
+
+            this.crawling = true;
+            this.crawlError = '';
+            this.crawlSuccess = false;
+
+            try {
+                const response = await fetch('/newsletters/crawl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: this.crawlUrl })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    this.crawlError = data.error;
+                } else {
+                    // 데이터 채우기
+                    if (data.title) this.title = data.title;
+                    if (data.description) this.description = data.description;
+                    if (data.html_content) this.htmlContent = data.html_content;
+                    if (data.published_at) this.publishedAt = data.published_at;
+                    this.externalUrl = this.crawlUrl;
+
+                    this.crawlSuccess = true;
+                }
+            } catch (e) {
+                this.crawlError = '크롤링 중 오류가 발생했습니다.';
+            } finally {
+                this.crawling = false;
+            }
+        }
+    };
+}
+</script>
+{% endblock %}

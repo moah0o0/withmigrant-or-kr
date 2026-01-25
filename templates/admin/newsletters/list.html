@@ -1,0 +1,138 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}소식지 관리{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">콘텐츠 관리</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">소식지</span>
+{% endblock %}
+
+{% block content %}
+<!-- 헤더 -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-notion-text">소식지</h1>
+        <p class="text-sm text-notion-text-muted mt-1">총 {{ pagination.total }}개</p>
+    </div>
+    <a href="{{ url_for('admin.newsletters_new') }}" class="btn-notion btn-primary">
+        + 새 소식지
+    </a>
+</div>
+
+<!-- 안내 -->
+<div class="card-notion mb-6 p-4 bg-blue-50 border-blue-200">
+    <div class="flex items-start gap-3">
+        <span class="text-lg">💡</span>
+        <div class="text-sm text-blue-800">
+            <strong>Stibee 소식지 URL</strong>을 입력하면 자동으로 내용을 가져올 수 있습니다.
+            새 소식지 등록 시 크롤링 기능을 사용해보세요!
+        </div>
+    </div>
+</div>
+
+<!-- 목록 -->
+<div class="grid gap-4">
+    {% for newsletter in pagination.items %}
+    <div id="newsletter-{{ newsletter.id }}" class="card-notion p-5 hover:shadow-md transition-shadow">
+        <div class="flex items-start gap-4">
+            <!-- 아이콘 -->
+            <div class="flex-shrink-0 w-14 h-14 rounded-lg bg-purple-100 flex items-center justify-center">
+                <span class="text-lg">📬</span>
+            </div>
+
+            <!-- 정보 -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-medium text-notion-text">
+                            <a href="{{ url_for('admin.newsletters_edit', id=newsletter.id) }}"
+                               class="hover:text-notion-accent">
+                                {{ newsletter.title }}
+                            </a>
+                        </h3>
+                        {% if newsletter.description %}
+                        <p class="text-sm text-notion-text-secondary mt-1 line-clamp-2">
+                            {{ newsletter.description }}
+                        </p>
+                        {% endif %}
+                        <div class="flex items-center gap-3 mt-2 text-xs text-notion-text-muted">
+                            <span>{{ newsletter.published_at.strftime('%Y.%m.%d') if newsletter.published_at else newsletter.created_at.strftime('%Y.%m.%d') if newsletter.created_at else '' }}</span>
+                            {% if newsletter.external_url %}
+                            <a href="{{ newsletter.external_url }}" target="_blank" class="text-notion-accent hover:underline">
+                                원본 보기 ↗
+                            </a>
+                            {% endif %}
+                            <span class="px-2 py-0.5 bg-notion-sidebar rounded text-notion-text-secondary">
+                                {{ 'HTML' if newsletter.content_type == 'html' else 'PDF' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 액션 -->
+                    <div class="flex items-center gap-2">
+                        <a href="{{ url_for('admin.newsletters_edit', id=newsletter.id) }}"
+                           class="btn-notion btn-secondary text-xs">수정</a>
+                        <button onclick="deleteNewsletter({{ newsletter.id }})"
+                                class="btn-notion btn-danger text-xs">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card-notion p-12 text-center">
+        <div class="text-4xl mb-4">📬</div>
+        <p class="text-notion-text-muted">등록된 소식지가 없습니다.</p>
+        <a href="{{ url_for('admin.newsletters_new') }}" class="inline-block mt-4 btn-notion btn-primary">
+            첫 소식지 등록하기
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 페이지네이션 -->
+{% if pagination.pages > 1 %}
+<div class="flex items-center justify-center gap-2 mt-6">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('admin.newsletters_list', page=pagination.prev_num) }}"
+       class="btn-notion btn-secondary">← 이전</a>
+    {% endif %}
+
+    <span class="text-sm text-notion-text-secondary px-4">
+        {{ pagination.page }} / {{ pagination.pages }}
+    </span>
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('admin.newsletters_list', page=pagination.next_num) }}"
+       class="btn-notion btn-secondary">다음 →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteNewsletter(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    fetch(`/newsletters/${id}/delete`, {
+        method: 'POST',
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`삭제 실패 (${res.status})`);
+        }
+        return res;
+    })
+    .then(() => {
+        document.getElementById(`newsletter-${id}`).remove();
+    })
+    .catch(err => {
+        console.error('삭제 오류:', err);
+        alert('삭제 중 오류가 발생했습니다: ' + err.message);
+    });
+}
+</script>
+{% endblock %}

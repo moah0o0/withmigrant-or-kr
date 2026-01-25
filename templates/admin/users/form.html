@@ -1,0 +1,91 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '관리자 수정' if user else '새 관리자' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">시스템</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.users_list') }}" class="text-notion-text-secondary hover:text-notion-accent">관리자 계정</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if user else '새 관리자' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-lg">
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '관리자 수정' if user else '새 관리자' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.users_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <!-- 아이디 -->
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">아이디</label>
+            {% if user %}
+            <input type="text" value="{{ user.username }}" disabled
+                   class="input-notion bg-notion-sidebar cursor-not-allowed">
+            <p class="text-xs text-notion-text-muted mt-1">아이디는 변경할 수 없습니다</p>
+            {% else %}
+            <input type="text" name="username" required
+                   placeholder="영문, 숫자 조합"
+                   class="input-notion">
+            {% endif %}
+        </div>
+
+        <!-- 비밀번호 -->
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">
+                비밀번호
+                {% if user %}<span class="text-notion-text-muted font-normal">(변경 시에만 입력)</span>{% endif %}
+            </label>
+            <input type="password" name="password" {{ 'required' if not user else '' }}
+                   placeholder="{{ '새 비밀번호' if user else '비밀번호' }}"
+                   class="input-notion">
+        </div>
+
+        <!-- 이름 -->
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">이름</label>
+            <input type="text" name="name" value="{{ user.name if user else '' }}"
+                   placeholder="표시될 이름"
+                   class="input-notion">
+        </div>
+
+        <!-- 권한 -->
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">권한</label>
+            <select name="role" class="input-notion">
+                <option value="admin" {{ 'selected' if not user or user.role == 'admin' else '' }}>
+                    관리자 - 콘텐츠 관리
+                </option>
+                <option value="super_admin" {{ 'selected' if user and user.role == 'super_admin' else '' }}>
+                    최고관리자 - 모든 권한
+                </option>
+            </select>
+            <p class="text-xs text-notion-text-muted mt-1">
+                최고관리자만 관리자 계정을 관리할 수 있습니다
+            </p>
+        </div>
+
+        <!-- 활성화 상태 (수정 시에만) -->
+        {% if user %}
+        <div class="pt-4 border-t border-notion-border">
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_active" {{ 'checked' if user.is_active else '' }}
+                       class="w-4 h-4 text-notion-accent rounded border-notion-border focus:ring-notion-accent">
+                <span class="text-sm text-notion-text">계정 활성화</span>
+            </label>
+            <p class="text-xs text-notion-text-muted mt-1">
+                비활성화된 계정은 로그인할 수 없습니다
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ '자원활동 수정' if area else '자원활동 추가' }}{% endblock %}
+
+{% block breadcrumb %}
+<span class="text-notion-text-secondary">함께하는 법</span>
+<span class="mx-2 text-notion-text-muted">/</span>
+<a href="{{ url_for('admin.volunteer_areas_list') }}" class="text-notion-text-secondary hover:text-notion-accent">자원활동</a>
+<span class="mx-2 text-notion-text-muted">/</span>
+<span class="text-notion-text font-medium">{{ '수정' if area else '추가' }}</span>
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="max-w-md">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold text-notion-text">
+            {{ '자원활동 수정' if area else '자원활동 추가' }}
+        </h1>
+        <div class="flex items-center gap-3">
+            <a href="{{ url_for('admin.volunteer_areas_list') }}" class="btn-notion btn-secondary">취소</a>
+            <button type="submit" class="btn-notion btn-primary">저장</button>
+        </div>
+    </div>
+
+    <div class="card-notion p-6 space-y-6">
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">이름 *</label>
+            <input type="text" name="name" value="{{ area.name if area else '' }}"
+                   required placeholder="예: 통역봉사, 한국어교육"
+                   class="input-notion">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-notion-text mb-2">설명</label>
+            <textarea name="description" rows="3" class="input-notion"
+                      placeholder="활동에 대한 간단한 설명">{{ area.description if area else '' }}</textarea>
+        </div>
+
+        {% if area %}
+        <div>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_active" {{ 'checked' if area.is_active else '' }}
+                       class="w-4 h-4 text-notion-accent rounded border-notion-border">
+                <span class="text-sm text-notion-text">활성화</span>
+            </label>
+        </div>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}
+
