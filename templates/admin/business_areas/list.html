@@ -44,11 +44,9 @@
                 </td>
                 <td class="text-sm text-notion-text-secondary">{{ area.description or '-' }}</td>
                 <td class="text-center">
-                    {% if area.is_active %}
-                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded">활성</span>
-                    {% else %}
-                    <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded">비활성</span>
-                    {% endif %}
+                    <button onclick="toggleActive({{ area.id }})" id="status-{{ area.id }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity {% if area.is_active %}text-green-700 bg-green-100{% else %}text-gray-500 bg-gray-100{% endif %}">
+                        <span id="status-text-{{ area.id }}">{% if area.is_active %}활성{% else %}비활성{% endif %}</span>
+                    </button>
                 </td>
                 <td class="text-center">
                     <div class="flex items-center justify-center gap-2">
@@ -87,6 +85,30 @@ new Sortable(document.getElementById('sortable-list'), {
         });
     }
 });
+
+function toggleActive(id) {
+    fetch(`{{ url_for('admin.business_areas_list') }}/${id}/toggle-active`, {
+        method: 'POST',
+        headers: { 'HX-Request': 'true' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const btn = document.getElementById(`status-${id}`);
+        const text = document.getElementById(`status-text-${id}`);
+
+        if (data.is_active) {
+            btn.className = 'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity text-green-700 bg-green-100';
+            text.textContent = '활성';
+        } else {
+            btn.className = 'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity text-gray-500 bg-gray-100';
+            text.textContent = '비활성';
+        }
+    })
+    .catch(err => {
+        console.error('상태 변경 오류:', err);
+        alert('상태 변경 중 오류가 발생했습니다.');
+    });
+}
 
 function deleteItem(id) {
     if (confirm('정말 삭제하시겠습니까?')) {

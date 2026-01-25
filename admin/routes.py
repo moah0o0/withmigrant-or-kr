@@ -1064,6 +1064,20 @@ def business_areas_delete(id):
     return redirect(url_for('admin.business_areas_list'))
 
 
+@admin_bp.route('/business-areas/<int:id>/toggle-active', methods=['POST'])
+@login_required
+def business_areas_toggle_active(id):
+    """사업분야 활성화 토글"""
+    area = BusinessArea.query.get_or_404(id)
+    area.is_active = not area.is_active
+    db.session.commit()
+
+    if request.headers.get('HX-Request'):
+        return jsonify({'is_active': area.is_active})
+
+    return redirect(url_for('admin.business_areas_list'))
+
+
 @admin_bp.route('/business-areas/reorder', methods=['POST'])
 @login_required
 def business_areas_reorder():
