@@ -1,0 +1,228 @@
+{% extends "admin/base.html" %}
+
+{% block title %}파일 관리{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- 헤더 -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-notion-text">📁 파일 관리</h1>
+            <p class="text-sm text-notion-text-secondary mt-1">업로드된 모든 파일을 확인하고 관리합니다</p>
+        </div>
+    </div>
+
+    <!-- 저장 공간 정보 -->
+    <div class="bg-white rounded-lg border border-notion-border p-6 mb-6">
+        <h2 class="text-lg font-semibold text-notion-text mb-4">💾 저장 공간</h2>
+
+        <!-- 진행바 -->
+        <div class="mb-4">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-notion-text-secondary">
+                    사용 중: {{ "%.2f"|format(storage_info.total_usage_gb) }} GB
+                </span>
+                <span class="text-notion-text-secondary">
+                    전체: {{ "%.0f"|format(storage_info.max_storage_gb) }} GB
+                </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="bg-blue-600 h-4 rounded-full transition-all duration-300"
+                     style="width: {{ "%.1f"|format(storage_info.usage_percent) }}%"></div>
+            </div>
+            <div class="text-center text-sm text-notion-text-secondary mt-2">
+                {{ "%.1f"|format(storage_info.usage_percent) }}% 사용 중
+            </div>
+        </div>
+
+        <!-- 상세 정보 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-blue-50 rounded-lg p-4">
+                <div class="text-xs text-blue-600 font-semibold mb-1">사용 중</div>
+                <div class="text-2xl font-bold text-blue-700">
+                    {{ "%.2f"|format(storage_info.total_usage_gb) }} GB
+                </div>
+                <div class="text-xs text-blue-600 mt-1">
+                    {{ "{:,}".format((storage_info.total_usage / (1024 * 1024))|int) }} MB
+                </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4">
+                <div class="text-xs text-green-600 font-semibold mb-1">잔여 공간</div>
+                <div class="text-2xl font-bold text-green-700">
+                    {{ "%.2f"|format(storage_info.remaining_gb) }} GB
+                </div>
+                <div class="text-xs text-green-600 mt-1">
+                    {{ "{:,}".format((storage_info.remaining / (1024 * 1024))|int) }} MB
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="text-xs text-gray-600 font-semibold mb-1">전체 용량</div>
+                <div class="text-2xl font-bold text-gray-700">
+                    {{ "%.0f"|format(storage_info.max_storage_gb) }} GB
+                </div>
+                <div class="text-xs text-gray-600 mt-1">
+                    제한 용량
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 파일 목록 -->
+    <div class="bg-white rounded-lg border border-notion-border overflow-hidden">
+        <div class="p-4 border-b border-notion-border">
+            <h2 class="text-lg font-semibold text-notion-text">
+                📄 파일 목록
+                <span class="text-sm font-normal text-notion-text-secondary ml-2">
+                    (총 {{ pagination.total }}개)
+                </span>
+            </h2>
+        </div>
+
+        {% if files %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-notion-border">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            미리보기
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            파일명
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            타입
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            크기
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            업로드일
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-notion-text-secondary uppercase tracking-wider">
+                            작업
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-notion-border">
+                    {% for file in files %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <!-- 미리보기 -->
+                        <td class="px-4 py-3">
+                            {% if file.is_image %}
+                            <img src="{{ file.url }}" alt="{{ file.original_filename }}"
+                                 class="w-16 h-16 object-cover rounded border border-notion-border">
+                            {% else %}
+                            <div class="w-16 h-16 flex items-center justify-center bg-gray-100 rounded border border-notion-border">
+                                <span class="text-2xl">
+                                    {% if file.mimetype and 'pdf' in file.mimetype %}📄
+                                    {% elif file.mimetype and 'word' in file.mimetype %}📝
+                                    {% elif file.mimetype and 'excel' in file.mimetype or 'sheet' in file.mimetype %}📊
+                                    {% elif file.mimetype and 'powerpoint' in file.mimetype or 'presentation' in file.mimetype %}📊
+                                    {% elif file.mimetype and 'zip' in file.mimetype or 'compressed' in file.mimetype %}🗜️
+                                    {% else %}📎
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- 파일명 -->
+                        <td class="px-4 py-3">
+                            <div class="max-w-xs">
+                                <div class="font-medium text-notion-text truncate" title="{{ file.original_filename }}">
+                                    {{ file.original_filename }}
+                                </div>
+                                <div class="text-xs text-notion-text-muted mt-1 truncate" title="{{ file.filename }}">
+                                    {{ file.filename }}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- 타입 -->
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ file.mimetype or 'unknown' }}
+                            </span>
+                        </td>
+
+                        <!-- 크기 -->
+                        <td class="px-4 py-3 text-sm text-notion-text-secondary">
+                            {% if file.size %}
+                                {% if file.size < 1024 %}
+                                    {{ file.size }} B
+                                {% elif file.size < 1024 * 1024 %}
+                                    {{ "%.1f"|format(file.size / 1024) }} KB
+                                {% else %}
+                                    {{ "%.2f"|format(file.size / (1024 * 1024)) }} MB
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <!-- 업로드일 -->
+                        <td class="px-4 py-3 text-sm text-notion-text-secondary">
+                            {{ file.created_at.strftime('%Y-%m-%d %H:%M') if file.created_at else '-' }}
+                        </td>
+
+                        <!-- 작업 -->
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <a href="{{ file.url }}" target="_blank"
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    보기
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.file_delete', file_id=file.id) }}"
+                                      onsubmit="return confirm('이 파일을 삭제하시겠습니까?\n\n주의: 게시물에서 사용 중인 파일은 삭제되지 않습니다.');"
+                                      class="inline">
+                                    <button type="submit"
+                                            class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                        삭제
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        {% if pagination.pages > 1 %}
+        <div class="px-4 py-3 border-t border-notion-border bg-gray-50">
+            <div class="flex justify-between items-center">
+                <div class="text-sm text-notion-text-secondary">
+                    {{ pagination.total }}개 중
+                    {{ ((pagination.page - 1) * 50 + 1) }}-{{ [pagination.page * 50, pagination.total]|min }}개 표시
+                </div>
+                <div class="flex gap-2">
+                    {% if pagination.has_prev %}
+                    <a href="{{ url_for('admin.files_list', page=pagination.prev_num) }}"
+                       class="px-3 py-1 bg-white border border-notion-border rounded text-sm hover:bg-gray-50">
+                        이전
+                    </a>
+                    {% endif %}
+
+                    <span class="px-3 py-1 text-sm text-notion-text-secondary">
+                        {{ pagination.page }} / {{ pagination.pages }}
+                    </span>
+
+                    {% if pagination.has_next %}
+                    <a href="{{ url_for('admin.files_list', page=pagination.next_num) }}"
+                       class="px-3 py-1 bg-white border border-notion-border rounded text-sm hover:bg-gray-50">
+                        다음
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="p-8 text-center text-notion-text-secondary">
+            업로드된 파일이 없습니다.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

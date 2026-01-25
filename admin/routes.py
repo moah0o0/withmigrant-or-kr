@@ -2005,6 +2005,71 @@ def operating_hours_office():
 
 
 # ==========================================
+# 파일 관리
+# ==========================================
+@admin_bp.route('/files')
+@login_required
+def files_list():
+    """파일 관리 페이지"""
+    from .utils import get_total_storage_usage
+    from config import Config
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
+
+    # 파일 목록 조회 (최근 업로드 순)
+    pagination = File.query.order_by(File.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    # 저장 공간 정보
+    total_usage = get_total_storage_usage()
+    max_storage = Config.MAX_TOTAL_STORAGE
+    remaining = max_storage - total_usage
+    usage_percent = (total_usage / max_storage * 100) if max_storage > 0 else 0
+
+    storage_info = {
+        'total_usage': total_usage,
+        'total_usage_gb': total_usage / (1024 * 1024 * 1024),
+        'max_storage': max_storage,
+        'max_storage_gb': max_storage / (1024 * 1024 * 1024),
+        'remaining': remaining,
+        'remaining_gb': remaining / (1024 * 1024 * 1024),
+        'usage_percent': usage_percent
+    }
+
+    return render_template('admin/files.html',
+                         files=pagination.items,
+                         pagination=pagination,
+                         storage_info=storage_info)
+
+
+@admin_bp.route('/files/<int:file_id>/delete', methods=['POST'])
+@login_required
+def file_delete(file_id):
+    """파일 삭제"""
+    from .utils import delete_file_record
+
+    file_record = File.query.get_or_404(file_id)
+
+    # 파일이 사용 중인지 확인
+    if file_record.is_used():
+        flash('이 파일은 게시물에서 사용 중이므로 삭제할 수 없습니다.', 'error')
+        return redirect(url_for('admin.files_list'))
+
+    # 파일 삭제
+    success = delete_file_record(file_record)
+
+    if success:
+        db.session.commit()
+        flash('파일이 삭제되었습니다.', 'success')
+    else:
+        flash('파일 삭제에 실패했습니다.', 'error')
+
+    return redirect(url_for('admin.files_list'))
+
+
+# ==========================================
 # SSG 빌드 관리
 # ==========================================
 @admin_bp.route('/build/status')

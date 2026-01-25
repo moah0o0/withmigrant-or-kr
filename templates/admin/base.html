@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}관리자{% endblock %} - {{ site.site_name or '양산외국인노동자의집' }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/static/split/WantedSans.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Wanted Sans', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'notion': {
+                            'bg': '#ffffff',
+                            'sidebar': '#f7f6f3',
+                            'hover': '#efefef',
+                            'border': '#e9e9e7',
+                            'text': '#37352f',
+                            'text-secondary': '#787774',
+                            'text-muted': '#9b9a97',
+                            'accent': '#2eaadc',
+                            'accent-hover': '#0b8ec0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <style>
+        * { font-family: 'Wanted Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        body { font-weight: 500; }
+
+        /* Notion 스타일 */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #37352f;
+            transition: background 0.1s;
+            min-height: 40px;
+        }
+        .sidebar-item:hover { background: #efefef; }
+        .sidebar-item.active {
+            background: #efefef;
+            font-weight: 600;
+        }
+
+        .sidebar-section {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9b9a97;
+            padding: 0.5rem 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        /* 입력 필드 */
+        .input-notion {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e9e9e7;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+        }
+        .input-notion:focus {
+            outline: none;
+            border-color: #2eaadc;
+            box-shadow: 0 0 0 2px rgba(46, 170, 220, 0.2);
+        }
+
+        /* 버튼 */
+        .btn-notion {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: #2eaadc;
+            color: white;
+        }
+        .btn-primary:hover { background: #0b8ec0; }
+        .btn-secondary {
+            background: #f7f6f3;
+            color: #37352f;
+            border: 1px solid #e9e9e7;
+        }
+        .btn-secondary:hover { background: #efefef; }
+        .btn-danger { background: #eb4d4b; color: white; }
+        .btn-danger:hover { background: #c0392b; }
+
+        /* 카드 */
+        .card-notion {
+            background: white;
+            border: 1px solid #e9e9e7;
+            border-radius: 0.5rem;
+        }
+
+        /* 테이블 */
+        .table-notion {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-notion th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9b9a97;
+            border-bottom: 1px solid #e9e9e7;
+            white-space: nowrap;
+        }
+        .table-notion td {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e9e9e7;
+        }
+        .table-notion tr:hover { background: #f7f6f3; }
+        .table-notion tr:last-child td { border-bottom: none; }
+
+        /* 토스트 알림 */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        .toast-success { background: #d4edda; color: #155724; }
+        .toast-error { background: #f8d7da; color: #721c24; }
+        .toast-warning { background: #fff3cd; color: #856404; }
+        .toast-info { background: #d1ecf1; color: #0c5460; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* 모바일 테이블 스크롤 */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-notion-bg min-h-screen" x-data="{ sidebarOpen: false }">
+    <div class="flex min-h-screen">
+        <!-- 모바일 오버레이 -->
+        <div x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false"
+             class="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
+
+        <!-- 사이드바 -->
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+               class="w-64 bg-notion-sidebar border-r border-notion-border flex flex-col fixed h-full z-50 transition-transform duration-200 lg:translate-x-0 lg:w-60">
+            <!-- 로고 -->
+            <div class="p-4 border-b border-notion-border flex items-center justify-between">
+                <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-2">
+                    <span class="text-lg">🏠</span>
+                    <div>
+                        <div class="text-sm font-semibold text-notion-text">{{ site.site_name or '양산외국인노동자의집' }}</div>
+                        <div class="text-xs text-notion-text-muted">관리자</div>
+                    </div>
+                </a>
+                <!-- 모바일 닫기 버튼 -->
+                <button @click="sidebarOpen = false" class="lg:hidden p-2 text-notion-text-muted hover:text-notion-text">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 메뉴 -->
+            <nav class="flex-1 p-2 overflow-y-auto">
+                <a href="{{ url_for('admin.dashboard') }}" @click="sidebarOpen = false" class="sidebar-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                    <span>📊</span> 대시보드
+                </a>
+
+                <div class="sidebar-section">콘텐츠 관리</div>
+                <a href="{{ url_for('admin.notices_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'notices' in request.endpoint %}active{% endif %}">
+                    <span>📢</span> 공지사항
+                </a>
+                <a href="{{ url_for('admin.activities_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'activities' in request.endpoint %}active{% endif %}">
+                    <span>📝</span> 활동후기
+                </a>
+                <a href="{{ url_for('admin.categories_list') }}" @click="sidebarOpen = false" class="sidebar-item pl-8 text-sm {% if 'categories' in request.endpoint %}active{% endif %}">
+                    <span>🏷️</span> 카테고리
+                </a>
+                <a href="{{ url_for('admin.newsletters_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'newsletters' in request.endpoint %}active{% endif %}">
+                    <span>📬</span> 소식지
+                </a>
+
+                <div class="sidebar-section">사이트 설정</div>
+                <a href="{{ url_for('admin.site_info') }}" @click="sidebarOpen = false" class="sidebar-item {% if request.endpoint == 'admin.site_info' %}active{% endif %}">
+                    <span>⚙️</span> 사이트 정보
+                </a>
+                <a href="{{ url_for('admin.hero_photos_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'hero_photos' in request.endpoint %}active{% endif %}">
+                    <span>🖼️</span> 메인 사진
+                </a>
+                <a href="{{ url_for('admin.business_areas_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'business_areas' in request.endpoint %}active{% endif %}">
+                    <span>📂</span> 사업분야
+                </a>
+                <a href="{{ url_for('admin.history_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'history' in request.endpoint %}active{% endif %}">
+                    <span>📅</span> 연혁
+                </a>
+                <a href="{{ url_for('admin.transportation') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'transportation' in request.endpoint %}active{% endif %}">
+                    <span>🚌</span> 대중교통
+                </a>
+                <a href="{{ url_for('admin.operating_hours') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'operating_hours' in request.endpoint %}active{% endif %}">
+                    <span>🕐</span> 운영시간
+                </a>
+
+                <div class="sidebar-section">함께하는 법</div>
+                <a href="{{ url_for('admin.volunteer_areas_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'volunteer_areas' in request.endpoint %}active{% endif %}">
+                    <span>🤝</span> 자원활동
+                </a>
+                <a href="{{ url_for('admin.donation_areas_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'donation_areas' in request.endpoint %}active{% endif %}">
+                    <span>💝</span> 후원분야
+                </a>
+                <a href="{{ url_for('admin.donation_usages_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'donation_usages' in request.endpoint %}active{% endif %}">
+                    <span>📋</span> 사용용도
+                </a>
+
+                <div class="sidebar-section">후원 관리</div>
+                <a href="{{ url_for('admin.donations_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if request.endpoint == 'admin.donations_list' or request.endpoint == 'admin.donation_pdf' %}active{% endif %}">
+                    <span>💝</span> 후원신청
+                    {% set pending = pending_donations_count|default(0) %}
+                    {% if pending > 0 %}
+                    <span class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{{ pending }}</span>
+                    {% endif %}
+                </a>
+
+                <div class="sidebar-section">시스템</div>
+                <a href="{{ url_for('admin.files_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'files' in request.endpoint %}active{% endif %}">
+                    <span>📁</span> 파일 관리
+                </a>
+                <a href="{{ url_for('admin.build_history') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'build' in request.endpoint %}active{% endif %}">
+                    <span>🔨</span> 빌드 히스토리
+                </a>
+                {% if session.get('admin_role') == 'super_admin' %}
+                <a href="{{ url_for('admin.users_list') }}" @click="sidebarOpen = false" class="sidebar-item {% if 'users' in request.endpoint %}active{% endif %}">
+                    <span>👥</span> 관리자 계정
+                </a>
+                {% endif %}
+            </nav>
+
+            <!-- 하단 -->
+            <div class="p-2 border-t border-notion-border">
+                <a href="{{ STATIC_SITE_URL }}" target="_blank" class="sidebar-item">
+                    <span>🔗</span> 사이트 보기
+                </a>
+                <a href="{{ url_for('admin.logout') }}" class="sidebar-item text-red-600">
+                    <span>🚪</span> 로그아웃
+                </a>
+            </div>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="flex-1 lg:ml-60">
+            <!-- 헤더 -->
+            <header class="h-14 border-b border-notion-border bg-white flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <!-- 모바일 메뉴 버튼 -->
+                    <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-2 text-notion-text hover:bg-notion-hover rounded-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <div class="text-sm text-notion-text-secondary hidden sm:block">
+                        {% block breadcrumb %}{% endblock %}
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-notion-text-secondary">{{ session.get('admin_name', '관리자') }}</span>
+                </div>
+            </header>
+
+            <!-- 콘텐츠 -->
+            <div class="p-4 lg:p-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="toast toast-{{ category }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 공통 삭제 함수 (오류 처리 포함)
+        async function deleteWithErrorHandling(url, confirmMessage = '정말 삭제하시겠습니까?') {
+            if (!confirm(confirmMessage)) return false;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'HX-Request': 'true' }
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`삭제 실패 (${response.status}): ${text}`);
+                }
+
+                location.reload();
+                return true;
+            } catch (err) {
+                console.error('삭제 오류:', err);
+                alert('삭제 중 오류가 발생했습니다: ' + err.message);
+                return false;
+            }
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
