@@ -84,9 +84,10 @@ Flask 기반 SSG(Static Site Generation) 하이브리드 시스템으로 구축�
 1. GitHub Actions에서 SSH로 서버 접속
 2. `git reset --hard origin/main` (서버 변경사항 무시)
 3. `pip install -r requirements.txt` (패키지 업데이트)
-4. `python build.py` (정적 사이트 빌드)
-5. 파일 권한 설정 (`chown`, `chmod`)
-6. `systemctl restart migrant-yangsan` (서비스 재시작)
+4. `python file_manager.py all` (파일 관리: DB 동기화 + 고아 파일 확인)
+5. `python build.py` (정적 사이트 빌드)
+6. 파일 권한 설정 (`chown`, `chmod`)
+7. `systemctl restart migrant-yangsan` (서비스 재시작)
 
 ### 필요한 GitHub Secrets
 - `SSH_HOST`: 서버 IP 주소
@@ -202,6 +203,7 @@ homepage/
 ├── build_triggers.py         # 자동 빌드 트리거
 ├── background_builder.py     # 백그라운드 빌드 실행
 ├── run_build.py              # 독립 프로세스 빌드
+├── file_manager.py           # 파일 관리 (DB 동기화, 고아 파일 정리)
 ├── ssg_serve.py              # 정적 파일 개발 서버
 ├── requirements.txt          # Python 패키지 목록
 ├── data.db                   # SQLite 데이터베이스
@@ -238,6 +240,48 @@ homepage/
     ├── donation.html
     ├── static/
     └── uploads/              # 업로드 파일 (Git 제외)
+```
+
+---
+
+## 파일 관리 시스템
+
+업로드된 파일과 DB 레코드의 동기화를 관리하는 통합 도구입니다.
+
+### 기능
+- **DB 동기화**: `dist/uploads`에 있지만 DB에 없는 파일을 자동 등록
+- **고아 파일 확인**: 어디서도 사용되지 않는 파일 목록 출력
+- **고아 파일 제거**: 사용하지 않는 파일 삭제 (확인 후)
+
+### 사용법
+
+#### 대화형 모드
+```bash
+python3 file_manager.py
+# 메뉴에서 1-4 선택
+```
+
+#### 명령행 옵션 (서버 자동화)
+```bash
+# DB 동기화
+python3 file_manager.py sync
+
+# 고아 파일 확인
+python3 file_manager.py check
+
+# 고아 파일 제거 (확인 필요)
+python3 file_manager.py remove
+
+# 전체 실행 (동기화 + 확인)
+python3 file_manager.py all
+```
+
+### 자동 실행
+- **GitHub Actions**: Push 시 자동으로 `file_manager.py all` 실행
+- **정기 점검**: Cron으로 월 1회 실행 권장
+```bash
+# 예: 매월 1일 자정에 확인
+0 0 1 * * cd /var/www/migrant-yangsan && python3 file_manager.py check >> /var/log/file_check.log 2>&1
 ```
 
 ---
