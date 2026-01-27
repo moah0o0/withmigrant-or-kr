@@ -8,18 +8,20 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-this-secret-key}
       - STATIC_DOMAIN=${STATIC_DOMAIN:-http://localhost}
       - API_DOMAIN=${API_DOMAIN:-http://localhost}
+    volumes:
+      - /root/withmigrant-yangsan-data/data.db:/app/data.db
+      - /root/withmigrant-yangsan-data/dist:/app/dist
     expose:
       - "8000"
     networks:
       - yangsan-network
-    # Coolify Storages에서 설정:
-    # /root/withmigrant-yangsan-data/data.db -> /app/data.db
-    # /root/withmigrant-yangsan-data/dist -> /app/dist
 
   # Nginx for static site
   web:
     build: ./nginx
     restart: unless-stopped
+    volumes:
+      - /root/withmigrant-yangsan-data/dist:/usr/share/nginx/html:ro
     expose:
       - "80"
     depends_on:
@@ -27,8 +29,6 @@ services:
         condition: service_healthy
     networks:
       - yangsan-network
-    # Coolify Storages에서 설정:
-    # /root/withmigrant-yangsan-data/dist -> /usr/share/nginx/html
 
 networks:
   yangsan-network:
