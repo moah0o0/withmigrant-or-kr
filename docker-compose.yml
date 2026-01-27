@@ -17,7 +17,7 @@ services:
     networks:
       - yangsan-network
 
-  # Nginx
+  # Nginx APP
   web:
     build: ./nginx
     restart: unless-stopped
