@@ -1,5 +1,5 @@
 services:
-  # Flask Admin API
+  # Flask Admin API (KST)
   admin:
     build: .
     restart: unless-stopped
