@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+htmlcov
+.pytest_cache
+.mypy_cache
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로컬 데이터 (컨테이너에서 볼륨으로 마운트)
+data.db
+logs/
+dist/uploads/
+
+# 환경설정
+.env
+.env.local
+.env.*.local
+
+# 문서
+*.md
+!README.md
+
+# Claude
+.claude/
