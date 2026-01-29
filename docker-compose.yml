@@ -12,6 +12,7 @@ services:
     volumes:
       - /root/withmigrant-yangsan-data/data.db:/app/data.db
       - /root/withmigrant-yangsan-data/dist:/app/dist
+      - /root/withmigrant-yangsan-data/logs:/root/withmigrant-yangsan-data/logs
     expose:
       - "8000"
     networks:
