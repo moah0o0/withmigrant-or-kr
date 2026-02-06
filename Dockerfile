@@ -6,6 +6,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     curl \
+    nodejs \
+    npm \
+    && npm install -g wrangler \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성 설치

@@ -9,26 +9,14 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-this-secret-key}
       - STATIC_DOMAIN=${STATIC_DOMAIN:-http://localhost}
       - API_DOMAIN=${API_DOMAIN:-http://localhost}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
     volumes:
       - /root/withmigrant-yangsan-data/data.db:/app/data.db
       - /root/withmigrant-yangsan-data/dist:/app/dist
       - /root/withmigrant-yangsan-data/logs:/root/withmigrant-yangsan-data/logs
     expose:
       - "8000"
-    networks:
-      - yangsan-network
-
-  # Nginx APP
-  web:
-    build: ./nginx
-    restart: unless-stopped
-    volumes:
-      - /root/withmigrant-yangsan-data/dist:/usr/share/nginx/html:ro
-    expose:
-      - "80"
-    depends_on:
-      admin:
-        condition: service_healthy
     networks:
       - yangsan-network
 

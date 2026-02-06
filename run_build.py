@@ -20,6 +20,35 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def deploy_to_cloudflare():
+    """빌드된 dist/ 폴더를 Cloudflare Pages에 배포"""
+    try:
+        result = subprocess.run(
+            ['wrangler', 'pages', 'deploy', 'dist/',
+             '--project-name', 'withmigrant',
+             '--branch', 'main'],
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+        if result.returncode == 0:
+            logger.info("Cloudflare Pages 배포 성공")
+            logger.info(f"배포 출력:\n{result.stdout}")
+            return True
+        else:
+            logger.error(f"Cloudflare Pages 배포 실패:\n{result.stderr}")
+            return False
+    except subprocess.TimeoutExpired:
+        logger.error("Cloudflare Pages 배포 타임아웃 (5분 초과)")
+        return False
+    except FileNotFoundError:
+        logger.error("wrangler CLI를 찾을 수 없습니다. Node.js/wrangler가 설치되어 있는지 확인하세요.")
+        return False
+    except Exception as e:
+        logger.error(f"Cloudflare Pages 배포 오류: {str(e)}")
+        return False
+
+
 def run_build(build_id, triggered_by='auto'):
     """
     SSG 빌드 실행
@@ -61,6 +90,11 @@ def run_build(build_id, triggered_by='auto'):
                 logger.info("빌드 성공")
                 logger.info(f"빌드 출력:\n{result.stdout}")
                 build_status.complete(success=True)
+
+                # Cloudflare Pages 배포
+                deploy_success = deploy_to_cloudflare()
+                if not deploy_success:
+                    logger.warning("빌드 성공했으나 Cloudflare Pages 배포 실패")
             else:
                 logger.error("빌드 실패")
                 logger.error(f"에러 출력:\n{result.stderr}")

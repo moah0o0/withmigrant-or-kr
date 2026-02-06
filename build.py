@@ -644,6 +644,29 @@ Sitemap: {Config.STATIC_DOMAIN}/sitemap.xml
     print("  ✓ robots.txt")
 
 
+def build_cf_headers():
+    """Cloudflare Pages _headers 파일 생성"""
+    headers_content = """/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/uploads/*
+  Cache-Control: public, max-age=31536000
+
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+"""
+    headers_path = os.path.join(Config.DIST_DIR, '_headers')
+    with open(headers_path, 'w', encoding='utf-8') as f:
+        f.write(headers_content)
+    print("  ✓ _headers (Cloudflare Pages)")
+
+
 def main():
     parser = argparse.ArgumentParser(description='SSG 빌드 스크립트')
     parser.add_argument('--clean', action='store_true', help='dist 폴더 초기화 후 빌드')
@@ -680,9 +703,10 @@ def main():
     build_donation_complete(app)
 
     # SEO 파일 생성
-    print("\n[3/3] SEO 파일 생성")
+    print("\n[3/3] SEO 및 배포 파일 생성")
     build_sitemap(app)
     build_robots_txt()
+    build_cf_headers()
 
     # 완료
     elapsed = datetime.now() - start_time
