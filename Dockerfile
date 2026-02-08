@@ -22,17 +22,19 @@ COPY . .
 RUN chmod +x /app/entrypoint.sh
 
 # 필요한 디렉토리 생성
-RUN mkdir -p logs dist/uploads
+RUN mkdir -p /app/logs /app/dist/uploads /app/data
 
 # 환경변수 설정
 ENV FLASK_DEBUG=False
 ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Seoul
 
 # 포트 노출
 EXPOSE 8000
 
+# 헬스체크
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:8000/login || exit 1
+
 # entrypoint 스크립트 실행
 CMD ["/app/entrypoint.sh"]
-
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD curl -f http://localhost:8000/ || exit 1

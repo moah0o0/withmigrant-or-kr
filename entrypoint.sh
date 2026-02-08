@@ -16,13 +16,12 @@ if [ -d "/app/static" ] && [ ! -d "/app/dist/static" ]; then
     cp -r /app/static /app/dist/
 fi
 
-LOG_DIR="/root/withmigrant-yangsan-data/logs"
-mkdir -p "$LOG_DIR"
+mkdir -p /app/logs
 
 echo "Starting Gunicorn..."
-gunicorn --bind 0.0.0.0:8000 --workers 2 --threads 4 \
-    --access-logfile "$LOG_DIR/access.log" \
-    --error-logfile - \
+exec gunicorn --bind 0.0.0.0:8000 --workers 2 --threads 4 \
+    --access-logfile /app/logs/access.log \
+    --error-logfile /app/logs/error.log \
     --capture-output \
     --log-level info \
-    app:app 2>&1 | tee -a "$LOG_DIR/error.log"
+    app:app
