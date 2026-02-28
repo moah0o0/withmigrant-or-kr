@@ -54,6 +54,28 @@
             </div>
         </div>
 
+        <!-- 소개 페이지 -->
+        <div class="card-notion p-6">
+            <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
+                <span>📄</span> 소개 페이지
+            </h2>
+            <p class="text-sm text-notion-text-secondary mb-4">소개 페이지에 표시되는 가치, 비전 문구를 관리합니다.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">가치</label>
+                    <textarea name="vision_text" rows="3"
+                              placeholder="고향과 가족을 떠나 낯선 이국땅에서 꿈을 키우며 살아가는 이주민들과 함께..."
+                              class="input-notion">{{ info.vision_text if info else '' }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-1">비전</label>
+                    <textarea name="mission_text" rows="3"
+                              placeholder="모든 이주민이 존엄하게 살아가는 세상"
+                              class="input-notion">{{ info.mission_text if info else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
         <!-- 연락처 -->
         <div class="card-notion p-6">
             <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
@@ -99,10 +121,65 @@
             </div>
         </div>
 
+        <!-- 로고 텍스트 색상 -->
+        <div class="card-notion p-6">
+            <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
+                🎨 로고 텍스트 색상
+            </h2>
+            <p class="text-sm text-notion-text-secondary mb-4">네비게이션 바에 표시되는 로고 텍스트의 색상을 변경합니다. 저장 후 빌드하면 사이트에 반영됩니다.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-notion-text mb-2">색상 선택</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" name="logo_text_color" id="logo-color-picker"
+                               value="{{ info.logo_text_color if info and info.logo_text_color else '#3a1671' }}"
+                               class="w-12 h-10 rounded border border-notion-border cursor-pointer">
+                        <input type="text" id="logo-color-text"
+                               value="{{ info.logo_text_color if info and info.logo_text_color else '#3a1671' }}"
+                               class="input-notion flex-1" readonly>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-notion-text-secondary mb-2">브랜드 프리셋 (로고 아이콘에서 추출한 색상)</p>
+                    <div class="flex gap-3 flex-wrap">
+                        {% set preset_colors = [
+                            ('#3A1671', '보라'),
+                            ('#F29F33', '주황'),
+                            ('#4A90E2', '파랑'),
+                            ('#528D4E', '초록'),
+                            ('#C2410C', '갈색'),
+                            ('#000000', '검정')
+                        ] %}
+                        {% for color, name in preset_colors %}
+                        <button type="button" onclick="setLogoColor('{{ color }}')"
+                                class="flex flex-col items-center gap-1 group" title="{{ name }} ({{ color }})">
+                            <span class="w-10 h-10 rounded-full border-2 border-transparent group-hover:border-notion-text transition-all group-hover:scale-110"
+                                  style="background-color: {{ color }}"></span>
+                            <span class="text-[10px] text-notion-text-muted">{{ name }}</span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <p class="text-xs text-notion-text-secondary mb-2">미리보기</p>
+                    <div class="bg-white rounded-lg border border-notion-border p-4 flex items-center gap-3">
+                        <img src="/static/images/logo.svg" alt="" class="h-8 w-auto">
+                        <span id="logo-text-preview"
+                              style="display:inline-block; height:1.75rem; aspect-ratio:317/72;
+                                     background-color: {{ info.logo_text_color if info and info.logo_text_color else '#3a1671' }};
+                                     -webkit-mask-image:url('/static/images/logo-text-black.svg');
+                                     -webkit-mask-size:contain; -webkit-mask-repeat:no-repeat;
+                                     mask-image:url('/static/images/logo-text-black.svg');
+                                     mask-size:contain; mask-repeat:no-repeat;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 후원 계좌 -->
         <div class="card-notion p-6">
             <h2 class="font-medium text-notion-text mb-4 pb-2 border-b border-notion-border flex items-center gap-2">
-                <span>💳</span> 후원 계좌
+                💳 후원 계좌
             </h2>
             <div class="grid md:grid-cols-3 gap-4">
                 <div>
@@ -133,4 +210,17 @@
         <button type="submit" class="btn-notion btn-primary">저장</button>
     </div>
 </form>
+
+<script>
+function setLogoColor(color) {
+    document.getElementById('logo-color-picker').value = color;
+    document.getElementById('logo-color-text').value = color;
+    document.getElementById('logo-text-preview').style.backgroundColor = color;
+}
+
+document.getElementById('logo-color-picker').addEventListener('input', function() {
+    document.getElementById('logo-color-text').value = this.value;
+    document.getElementById('logo-text-preview').style.backgroundColor = this.value;
+});
+</script>
 {% endblock %}

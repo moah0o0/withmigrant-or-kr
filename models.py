@@ -197,6 +197,15 @@ class SiteInfo(db.Model):
     bank_account = db.Column(db.String(100))
     bank_holder = db.Column(db.String(100))
 
+    # 소개 페이지
+    org_name_en = db.Column(db.String(200))       # 단체명 영문
+    site_name_en = db.Column(db.String(200))      # 사이트명 영문
+    vision_text = db.Column(db.Text)              # 가치 문구
+    mission_text = db.Column(db.Text)             # 비전 문구
+
+    # 로고 텍스트 색상
+    logo_text_color = db.Column(db.String(20), default='#3a1671')
+
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
@@ -221,6 +230,11 @@ class SiteInfo(db.Model):
             'bank_name': self.bank_name,
             'bank_account': self.bank_account,
             'bank_holder': self.bank_holder,
+            'org_name_en': self.org_name_en,
+            'site_name_en': self.site_name_en,
+            'vision_text': self.vision_text,
+            'mission_text': self.mission_text,
+            'logo_text_color': self.logo_text_color or '#3a1671',
         }
 
 

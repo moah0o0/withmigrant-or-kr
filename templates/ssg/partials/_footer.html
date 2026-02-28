@@ -1,13 +1,13 @@
 <!-- Footer -->
-<footer class="w-full bg-light-200 border-t border-light-300">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-12 md:py-16">
-        <div class="flex flex-col gap-10">
+<footer class="w-full bg-white" style="border-top:1px solid #e5e5e5;">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-12">
+        <div class="flex flex-col gap-6">
             <!-- Organization Info -->
-            <div class="flex flex-col gap-5">
-                <h3 class="text-base font-semibold text-dark-800">
+            <div class="flex flex-col gap-3">
+                <h3 class="text-sm font-bold text-dark-900">
                     {{ site.org_name or '사단법인 함께하는세상' }}
                 </h3>
-                <ul class="flex flex-col gap-2 text-sm text-dark-500">
+                <ul class="flex flex-col gap-1 text-xs font-medium text-dark-700">
                     <li>대표 : {{ site.representative or '김덕한' }}</li>
                     <li class="break-all">주소 : {{ site.address or '경상남도 양산시 북안북7길35 양산시근로자종합복지관 1층, 사단법인 함께하는세상' }}</li>
                     <li>Tel : {{ site.tel or '055-388-0988' }} / Fax : {{ site.fax or '055-366-0988' }}</li>
@@ -16,32 +16,27 @@
             </div>
 
             <!-- External Links -->
-            <div class="flex flex-col sm:flex-row gap-4">
-                <!-- Facebook Link -->
+            <div class="flex flex-wrap gap-2">
                 <a href="https://www.facebook.com/happysoli0988" target="_blank" rel="noopener noreferrer"
-                    class="card-modern flex items-center gap-4 py-3 px-5 hover:border-primary/30 transition-smooth group">
-                    <svg class="w-5 h-5 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    class="inline-flex items-center gap-2 text-xs font-bold text-dark-700 hover:text-dark-900 py-1.5 px-3 rounded-md transition-smooth"
+                    style="background:#f5f3f0;">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" style="color:#4267B2;">
+                        <path
+                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                     </svg>
-                    <span class="text-sm font-medium text-dark-600 group-hover:text-primary transition-smooth">
-                        {{ site.site_name or '양산외국인노동자의집' }} 페이스북
-                    </span>
+                    <span>페이스북</span>
                 </a>
-
-                <!-- Family Center Link -->
                 <a href="https://yangsan.familynet.or.kr/center/index.do" target="_blank" rel="noopener noreferrer"
-                    class="card-modern flex items-center gap-4 py-3 px-5 hover:border-primary/30 transition-smooth group">
-                    <span class="text-sm font-semibold text-primary">양산시가족센터</span>
-                    <span class="text-sm font-medium text-dark-600 group-hover:text-primary transition-smooth">
-                        홈페이지
-                    </span>
+                    class="inline-flex items-center gap-2 text-xs font-bold text-dark-700 hover:text-dark-900 py-1.5 px-3 rounded-md transition-smooth"
+                    style="background:#f5f3f0;">
+                    <span>양산시가족센터</span>
                 </a>
             </div>
 
             <!-- Copyright -->
-            <div class="pt-8 border-t border-light-300">
-                <p class="text-sm text-dark-400">
-                    &copy; {{ site.org_name or '사단법인 함께하는세상' }} {{ site.site_name or '양산외국인노동자의집' }}. All rights reserved.
+            <div class="pt-4" style="border-top:1px solid #e5e5e5;">
+                <p class="text-xs font-medium text-dark-700">
+                    &copy; {{ site.org_name or '사단법인 함께하는세상' }} {{ site.site_name or '양산외국인노동자의집' }}
                 </p>
             </div>
         </div>

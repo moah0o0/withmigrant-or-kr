@@ -6,195 +6,177 @@
 
 {% block content %}
 <!-- HERO SECTION -->
-<section class="relative w-full bg-light-100" id="hero">
-    <div class="flex flex-col max-w-[1200px] w-full mx-auto px-4 sm:px-6 lg:px-12 pt-6 md:pt-8 pb-6 md:pb-10">
-        <!-- Photo Card Container -->
-        <div class="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl" id="hero-photo-container">
-            {% for photo in hero_photos %}
-            <div class="hero-slide absolute inset-0 transition-opacity duration-1000 {% if loop.first %}opacity-100{% else %}opacity-0{% endif %}" data-index="{{ loop.index0 }}">
-                {% if photo.url %}
-                <img src="{{ photo.url }}" alt="{{ photo.description or '' }}" class="w-full h-full object-cover">
-                {% else %}
-                <img src="https://images.unsplash.com/photo-1591634466335-806021f30b97?w=1920&q=80" alt="활동 사진" class="w-full h-full object-cover">
-                {% endif %}
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            </div>
-            {% else %}
-            <div class="hero-slide absolute inset-0 transition-opacity duration-1000 opacity-100" data-index="0">
-                <img src="https://images.unsplash.com/photo-1591634466335-806021f30b97?w=1920&q=80" alt="활동 사진" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            </div>
-            {% endfor %}
-
-            <!-- Content Overlay -->
-            <div class="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-10">
-                <div class="flex flex-col gap-1.5 sm:gap-2 md:gap-3 max-w-xl">
-                    <p class="text-xs sm:text-sm md:text-base text-white/90 leading-relaxed line-clamp-2 sm:line-clamp-none">
-                        {{ site.intro_text or '고향을 떠나 낯선 이국땅에서 꿈을 키우며 살아가는 이주민들과 함께' }}
-                    </p>
-                    <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-display leading-tight">
-                        {{ site.slogan or '더불어사는세상' }}
-                    </h1>
+<section id="hero" class="relative overflow-hidden" style="background:#faf8f6; display:flex; flex-direction:column;">
+<style>#hero { min-height: 85vh; } @media(min-width:768px) { #hero { min-height: calc(100vh - 64px); } }</style>
+    <div class="max-w-[1200px] w-full mx-auto px-4 sm:px-6 lg:px-12 pt-14 sm:pt-20 md:pt-24 pb-8 sm:pb-10">
+        <p class="text-sm font-bold text-primary tracking-snug mb-3 sm:mb-4">{{ site.org_name or '사단법인 함께하는세상' }}</p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-black text-dark-900 tracking-tight leading-[1.35]" style="word-break:keep-all;">
+            <span id="hero-typed"></span><span id="hero-cursor" style="display:none;font-weight:300;color:#7c3aed;">|</span>
+        </h1>
+        {% if site.intro_text %}
+        <p class="mt-4 sm:mt-5 text-dark-700 font-medium text-sm sm:text-base leading-relaxed" style="max-width:min(32em, 100%); word-break:keep-all;">{{ site.intro_text }}</p>
+        {% endif %}
+    </div>
+    <!-- 포토 갤러리 -->
+    <div id="hero-gallery-wrap" class="overflow-hidden cursor-grab select-none md:mt-auto mt-4">
+        <div id="hero-gallery" class="flex gap-6 sm:gap-8 md:gap-10 px-4 sm:px-6 lg:px-12 pb-8 sm:pb-12 md:pb-16" style="width:max-content;">
+            {% if hero_photos %}
+                {% for photo in hero_photos[:5] %}
+                <div class="hero-pol flex-shrink-0 w-[340px] sm:w-[400px] md:w-[480px] lg:w-[540px] overflow-hidden cursor-pointer group bg-white" style="transition:transform 0.3s,box-shadow 0.3s; padding:10px 10px 0 10px; border-radius:2px;">
+                    <div class="aspect-[4/3] overflow-hidden bg-light-300">
+                        <img src="{{ photo.url }}" alt="{{ photo.description or '' }}" draggable="false"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="px-1 pt-2.5 pb-4 sm:pb-5">
+                        <p class="text-[11px] sm:text-xs text-dark-800 font-bold truncate">{{ photo.description or '&nbsp;' }}</p>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Bottom Info Bar -->
-        <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-5 md:pt-6">
-            <div class="flex flex-col gap-1">
-                <p class="text-dark-500 text-xs sm:text-sm line-clamp-2 sm:line-clamp-none" id="hero-desc">{% if hero_photos %}{{ hero_photos[0].description or "" }}{% endif %}</p>
-            </div>
-            <div class="flex items-center gap-2 self-end sm:self-auto">
-                <button id="hero-prev" class="text-dark-400 hover:text-dark-800 transition-colors p-1" aria-label="이전 사진">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 18L9 12L15 6" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-                <span class="text-dark-500 text-xs sm:text-sm min-w-[40px] text-center">
-                    <span id="hero-current">1</span>/<span id="hero-total">{{ hero_photos|length or 1 }}</span>
-                </span>
-                <button id="hero-next" class="text-dark-400 hover:text-dark-800 transition-colors p-1" aria-label="다음 사진">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 6L15 12L9 18" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-            </div>
+                {% endfor %}
+            {% else %}
+                {% for src in ['https://images.unsplash.com/photo-1591634466335-806021f30b97?w=800&q=80','https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80','https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&q=80','https://images.unsplash.com/photo-1591634466335-806021f30b97?w=800&q=80','https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80'] %}
+                <div class="hero-pol flex-shrink-0 w-[340px] sm:w-[400px] md:w-[480px] lg:w-[540px] overflow-hidden cursor-pointer group bg-white" style="transition:transform 0.3s,box-shadow 0.3s; padding:10px 10px 0 10px; border-radius:2px;">
+                    <div class="aspect-[4/3] overflow-hidden bg-light-300">
+                        <img src="{{ src }}" alt="" draggable="false"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="px-1 pt-2.5 pb-4 sm:pb-5">
+                        <p class="text-[11px] sm:text-xs text-dark-800 font-bold">&nbsp;</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 </section>
 
-<!-- ACTIVITIES SECTION -->
-<section class="w-full bg-light-200 py-12 md:py-16 relative overflow-hidden" id="activities">
-    <div class="absolute inset-0 gradient-radial pointer-events-none"></div>
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative">
-        <div class="flex flex-col lg:flex-row gap-8 lg:gap-16">
-            <!-- Left - Header -->
-            <div class="lg:w-80 flex-shrink-0">
-                <div class="flex flex-col gap-4 sm:gap-6 lg:sticky lg:top-28">
-                    <div class="flex flex-col gap-2 sm:gap-3">
-                        <h2 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-dark-800 leading-tight tracking-tight">
-                            {{ site.org_name or '사단법인 함께하는세상' }}<br>
-                            <span class="text-gradient">{{ site.site_name or '양산외국인노동자의집' }}</span>은<br>
-                            <span class="text-dark-500 font-normal text-sm sm:text-base md:text-lg">이런 일을 합니다</span>
-                        </h2>
-                    </div>
-                    <a href="/intro.html" class="hidden lg:inline-flex items-center gap-3 text-sm text-dark-500 hover:text-primary transition-smooth group">
-                        <span>단체소개</span>
-                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
+<!-- 히어로 슬로건 데이터 (typing 효과용) -->
+<script>
+window.__heroSlogan = {{ site.slogan|default('차별없이 평등한 사회', true)|tojson }};
+</script>
 
-            <!-- Right - Cards -->
-            <div class="flex-1">
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5" id="activities-grid">
-                    {% for area in business_areas %}
-                    <article class="activity-card group relative card-modern overflow-hidden cursor-pointer" data-index="{{ loop.index0 }}">
-                        <div class="activity-default">
-                            <div class="aspect-[4/3] overflow-hidden bg-light-300">
-                                {% if area.image_url %}
-                                <img src="{{ area.image_url }}" alt="{{ area.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                {% else %}
-                                <div class="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                                    <span class="text-xl sm:text-2xl md:text-3xl text-primary/60 font-light">{{ '%02d'|format(loop.index) }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="p-4 sm:p-5">
-                                <div class="flex items-start gap-2 sm:gap-3 mb-2">
-                                    <span class="text-xs font-bold text-primary">{{ '%02d'|format(loop.index) }}</span>
-                                    <h3 class="text-sm sm:text-sm text-dark-800 group-hover:text-primary transition-smooth leading-tight line-clamp-2">{{ area.name }}</h3>
-                                </div>
-                                <p class="text-xs text-dark-500 line-clamp-2 leading-relaxed">{{ area.description }}</p>
-                            </div>
-                        </div>
-                        <div class="activity-active opacity-0 pointer-events-none absolute inset-0 bg-white p-4 sm:p-5 flex flex-col transition-opacity duration-200">
-                            <div class="flex items-center justify-between mb-3 sm:mb-4">
-                                <div class="flex items-center gap-2 sm:gap-3">
-                                    <span class="text-xs font-bold text-primary">{{ '%02d'|format(loop.index) }}</span>
-                                    <h3 class="text-sm font-bold text-dark-800 line-clamp-1">{{ area.name }}</h3>
-                                </div>
-                                <button class="activity-close w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-light-200 text-dark-400 hover:text-dark-800 transition-smooth flex-shrink-0">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M18 6L6 18M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="flex-1 overflow-y-auto">
-                                {% if area.details %}
-                                <ul class="space-y-2">
-                                    {% for detail in area.details %}
-                                    <li class="flex items-start gap-2 text-xs text-dark-600 leading-relaxed">
-                                        <span class="text-primary mt-0.5">•</span>
-                                        <span>{{ detail }}</span>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                                {% else %}
-                                <p class="text-xs text-dark-400">{{ area.description }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </article>
-                    {% endfor %}
-                </div>
-                <div class="lg:hidden flex justify-center mt-8">
-                    <a href="/intro.html" class="inline-flex items-center gap-3 text-sm text-dark-500 hover:text-primary transition-smooth group">
-                        <span>단체소개</span>
-                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
+<!-- 라이트박스 -->
+<div id="hero-lightbox" class="fixed inset-0 z-[200] flex items-center justify-center opacity-0 pointer-events-none" style="background:rgba(0,0,0,0.88);transition:opacity 0.3s;">
+    <button id="lightbox-close" class="absolute top-5 right-5 text-white/70 hover:text-white" style="background:none;border:none;cursor:pointer;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="flex flex-col items-center gap-3 max-w-[90vw]">
+        <img id="lightbox-img" src="" alt="" style="max-height:80vh;object-fit:contain;border-radius:12px;">
+        <p id="lightbox-caption" class="text-sm font-normal text-center" style="color:rgba(255,255,255,0.7);max-width:600px;"></p>
+    </div>
+</div>
+
+<style>
+.hero-pol { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.hero-pol:nth-child(odd) { transform: rotate(-1.5deg); }
+.hero-pol:nth-child(even) { transform: rotate(1.5deg); }
+.hero-pol:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.15); transform: rotate(0deg) translateY(-4px) scale(1.02); z-index:10; position:relative; }
+#hero-cursor { animation: cursor-blink 0.6s step-end infinite; }
+@keyframes cursor-blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+</style>
+
+<!-- ACTIVITIES SECTION -->
+<section class="w-full bg-white py-14 md:py-20" id="activities" style="border-top:1px solid #e5e5e5;">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8 sm:mb-10">
+            <h2 class="font-black text-dark-900 tracking-tight leading-tight" style="font-size:clamp(1.1rem, 4vw, 2rem);">
+                <span class="text-primary" style="white-space:nowrap;">{{ site.site_name or '양산외국인노동자의집' }}</span>은<br>
+                이런 일을 합니다
+            </h2>
+            <a href="/intro.html" class="inline-flex items-center gap-2 text-sm text-dark-900 hover:text-primary transition-smooth group font-bold flex-shrink-0">
+                <span>단체소개</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
+                    <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
         </div>
+
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="activities-grid">
+            {% for area in business_areas %}
+            <article class="activity-card group relative overflow-hidden rounded-xl border border-light-300 bg-white cursor-pointer hover:border-primary/30 transition-smooth" data-index="{{ loop.index0 }}">
+                <div class="activity-default">
+                    <div class="aspect-[4/3] overflow-hidden bg-light-200">
+                        {% if area.image_url %}
+                        <img src="{{ area.image_url }}" alt="{{ area.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        {% else %}
+                        <div class="w-full h-full bg-primary/5 flex items-center justify-center">
+                            <span class="text-2xl font-black text-primary/20">{{ '%02d'|format(loop.index) }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-3 sm:p-4">
+                        <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth leading-tight line-clamp-2 mb-1">{{ area.name }}</h3>
+                        <p class="text-xs text-dark-700 font-medium line-clamp-2 leading-relaxed">{{ area.description }}</p>
+                    </div>
+                </div>
+                <div class="activity-active opacity-0 pointer-events-none absolute inset-0 bg-white p-4 flex flex-col transition-opacity duration-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-dark-900 line-clamp-1">{{ area.name }}</h3>
+                        <button class="activity-close w-7 h-7 flex items-center justify-center rounded-full hover:bg-light-200 text-dark-700 hover:text-dark-900 transition-smooth flex-shrink-0">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto">
+                        {% if area.details %}
+                        <ul class="space-y-1.5">
+                            {% for detail in area.details %}
+                            <li class="flex items-start gap-2 text-xs text-dark-800 font-medium leading-relaxed">
+                                <span class="text-primary mt-0.5 font-bold">&middot;</span>
+                                <span>{{ detail }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-xs text-dark-700 font-medium">{{ area.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+
     </div>
 </section>
 
 <!-- NOTICE SECTION -->
-<section class="w-full bg-white py-12 md:py-16" id="notice">
+<section class="w-full section-warm py-16 md:py-24" id="notice" style="border-top:1px solid #e5e5e5;">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
         <div class="flex flex-col lg:flex-row gap-10 lg:gap-16">
             <div class="lg:w-72 flex-shrink-0">
-                <div class="flex flex-col gap-4 sm:gap-8">
-                    <div class="flex flex-col gap-2 sm:gap-3">
-                        <p class="text-xs sm:text-sm text-primary">{{ site.org_name or '사단법인 함께하는세상' }}</p>
-                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-800 font-display tracking-tight">최근 공지</h2>
-                    </div>
-                    <a href="/notice/" class="hidden lg:inline-flex items-center gap-3 text-sm text-dark-500 hover:text-primary transition-smooth group">
+                <div class="flex flex-col gap-5">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-dark-900 tracking-tight">최근 공지</h2>
+                    <a href="/notice/" class="hidden lg:inline-flex items-center gap-2 text-sm text-dark-700 hover:text-primary transition-smooth group font-bold">
                         <span>더보기</span>
-                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
+                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </a>
                 </div>
             </div>
             <div class="flex-1">
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-col">
                     {% for notice in notices[:5] %}
-                    <a href="/notice/{{ notice.id }}.html" class="card-modern flex items-center gap-4 p-4 hover:border-primary/30 transition-smooth group">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <span class="text-xs font-bold text-primary">공지</span>
-                        </div>
+                    <a href="/notice/{{ notice.id }}.html" class="flex items-center gap-4 py-4 border-b border-light-300 hover:bg-white/60 transition-smooth group -mx-3 px-3 rounded-lg">
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-sm text-dark-800 group-hover:text-primary transition-smooth truncate">{{ notice.title }}</h3>
-                            <p class="text-xs text-dark-400 mt-1">{{ notice.created_at.strftime('%Y.%m.%d') if notice.created_at else '' }}</p>
+                            <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ notice.title }}</h3>
+                            <p class="text-xs text-dark-700 font-medium mt-1">{{ notice.created_at.strftime('%Y.%m.%d') if notice.created_at else '' }}</p>
                         </div>
-                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="text-dark-300 group-hover:text-primary group-hover:translate-x-1 transition-all">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-dark-700/40 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0">
+                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </a>
                     {% else %}
-                    <div class="card-modern p-8 text-center text-dark-400 text-sm">등록된 공지사항이 없습니다.</div>
+                    <div class="py-12 text-center text-dark-700 text-sm font-medium">등록된 공지사항이 없습니다.</div>
                     {% endfor %}
                 </div>
                 <div class="lg:hidden flex justify-center mt-8">
-                    <a href="/notice/" class="inline-flex items-center gap-3 text-sm text-dark-500 hover:text-primary transition-smooth group">
+                    <a href="/notice/" class="inline-flex items-center gap-2 text-sm text-dark-700 hover:text-primary transition-smooth group font-bold">
                         <span>더보기</span>
-                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
+                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </a>
                 </div>
@@ -204,44 +186,40 @@
 </section>
 
 <!-- ACTIVITY FEED SECTION -->
-<section class="w-full bg-light-200 py-12 md:py-16 relative overflow-hidden" id="activity-feed">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative">
+<section class="w-full bg-white py-16 md:py-24" id="activity-feed" style="border-top:1px solid #e5e5e5;">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
         <div class="flex flex-col gap-10">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6">
-                <div class="flex flex-col gap-2 sm:gap-3">
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-dark-800 tracking-tight">활동후기</h2>
-                    <p class="text-sm sm:text-base text-dark-500">활동가들이 직접 쓴 따끈따끈한 이야기들을 읽어보세요</p>
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div class="flex flex-col gap-2">
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-dark-900 tracking-tight">활동후기</h2>
+                    <p class="text-sm text-dark-700 font-bold">활동가들이 직접 쓴 따끈따끈한 이야기들</p>
                 </div>
-                <a href="/activity/" class="inline-flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-dark-500 hover:text-primary transition-smooth group">
-                    <span>활동후기 게시판</span>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform sm:w-4 sm:h-4">
-                        <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <a href="/activity/" class="inline-flex items-center gap-2 text-sm text-dark-700 hover:text-primary transition-smooth group font-bold">
+                    <span>전체보기</span>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
+                        <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </a>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {% for activity in activities[:6] %}
-                <a href="/activity/{{ activity.id }}.html" class="group flex flex-col card-modern p-4">
-                    <div class="aspect-video rounded-xl overflow-hidden bg-light-300 mb-4">
-                        {% if activity.image_url %}
-                        <img alt="{{ activity.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="{{ activity.image_url }}">
-                        {% else %}
-                        <div class="w-full h-full bg-gradient-to-br from-dark-700 to-dark-800 flex flex-col justify-center p-4">
-                            <h4 class="text-sm font-bold text-white mb-1 line-clamp-2 leading-snug">{{ activity.title }}</h4>
-                            {% if activity.content %}
-                            <p class="text-white/50 text-xs leading-relaxed line-clamp-2">{{ activity.content | striptags | truncate(60) }}</p>
-                            {% endif %}
-                        </div>
-                        {% endif %}
+                <a href="/activity/{{ activity.id }}.html" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden hover:border-primary/30 transition-smooth">
+                    {% if activity.image_url %}
+                    <div class="aspect-[4/3] overflow-hidden bg-light-200">
+                        <img alt="{{ activity.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ activity.image_url }}">
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <span class="text-xs text-primary">#{{ activity.category or '활동' }}</span>
-                        <h3 class="text-sm text-dark-800 group-hover:text-primary transition-smooth line-clamp-2 leading-relaxed">{{ activity.title }}</h3>
-                        <p class="text-xs text-dark-400">{{ activity.created_at.strftime('%Y.%m.%d') if activity.created_at else '' }}</p>
+                    {% endif %}
+                    <div class="flex flex-col gap-1.5 p-4 flex-1">
+                        <span class="text-xs text-primary font-bold">#{{ activity.category or '활동' }}</span>
+                        <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth line-clamp-2 leading-snug">{{ activity.title }}</h3>
+                        {% if not activity.image_url and activity.content %}
+                        <p class="text-xs text-dark-800 font-medium line-clamp-2 leading-relaxed">{{ activity.content | striptags | truncate(80) }}</p>
+                        {% endif %}
+                        <p class="text-xs text-dark-700 font-medium mt-auto pt-2">{{ activity.created_at.strftime('%Y.%m.%d') if activity.created_at else '' }}</p>
                     </div>
                 </a>
                 {% else %}
-                <div class="col-span-full card-modern p-12 text-center text-dark-400 text-sm">등록된 활동후기가 없습니다.</div>
+                <div class="col-span-full py-16 text-center text-dark-700 text-sm font-medium">등록된 활동후기가 없습니다.</div>
                 {% endfor %}
             </div>
         </div>
@@ -249,94 +227,110 @@
 </section>
 
 <!-- NEWSLETTER SECTION -->
-<section class="w-full bg-gradient-to-br from-primary to-primary-dark py-12 md:py-16 relative overflow-hidden" id="newsletter">
-    <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative">
+<section class="w-full relative overflow-hidden" id="newsletter">
+    <!-- 배경 이미지 (메인 사진 DB) -->
+    <div class="absolute inset-0">
+        {% if hero_photos and hero_photos[0].url %}
+        <img src="{{ hero_photos[0].url }}" alt="" class="w-full h-full object-cover">
+        {% elif activities and activities[0].image_url %}
+        <img src="{{ activities[0].image_url }}" alt="" class="w-full h-full object-cover">
+        {% endif %}
+        <!-- 그라디언트 오버레이 -->
+        <div class="absolute inset-0" style="background:linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.92) 100%);"></div>
+    </div>
+    <div class="relative z-10 max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-16 md:py-24">
         <div class="flex flex-col gap-10">
-            <div class="flex flex-col gap-4 sm:gap-8 max-w-2xl">
-                <svg class="w-8 h-6 sm:w-12 sm:h-10 text-white/30" fill="currentColor" viewBox="0 0 50 34">
+            <div class="flex flex-col gap-5 max-w-2xl">
+                <svg class="w-8 h-6 sm:w-10 sm:h-8" style="color:rgba(255,255,255,0.2);" fill="currentColor" viewBox="0 0 50 34">
                     <path d="M0 34V20.4C0 13.6 1.6 8.2 4.8 4.2C8 1.4 12.4 0 18 0V6.8C15.2 7.2 13 8.4 11.4 10.4C9.8 12.4 9 15 9 18.2V20H18V34H0ZM32 34V20.4C32 13.6 33.6 8.2 36.8 4.2C40 1.4 44.4 0 50 0V6.8C47.2 7.2 45 8.4 43.4 10.4C41.8 12.4 41 15 41 18.2V20H50V34H32Z" />
                 </svg>
-                <h2 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white font-display leading-relaxed">
-                    더 많은 사람들이 이주민과 더불어 살아갈 수 있도록,<br class="hidden sm:block">
-                    이주민 인권 문제에 관심을 가지고 참여할 수 있기를
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold leading-relaxed tracking-tight" style="color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.3);">
+                    더 많은 사람들이 이주민과<br>더불어 살아갈 수 있도록
                 </h2>
+                <p class="text-sm font-normal leading-relaxed" style="color:rgba(255,255,255,0.6); text-shadow:0 1px 4px rgba(0,0,0,0.2);">이주민 인권 문제에 관심을 가지고 참여할 수 있기를</p>
             </div>
-            <a href="/newsletter/" class="inline-flex items-center gap-3 text-sm text-white/80 hover:text-white transition-smooth group">
-                <span>소식지 '사람이 사람에게'</span>
-                <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                    <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </a>
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col">
                 {% for nl in newsletters[:3] %}
-                <a href="/newsletter/{{ nl.id }}.html" class="bg-white/90 backdrop-blur py-4 px-5 rounded-2xl flex items-center justify-between gap-4 hover:bg-white transition-smooth group">
-                    <p class="text-sm text-dark-800 group-hover:text-primary transition-smooth truncate">{{ nl.title }}</p>
+                <a href="/newsletter/{{ nl.id }}.html" class="flex items-center justify-between gap-4 py-4 group transition-smooth" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <p class="text-sm font-medium truncate transition-smooth" style="color:rgba(255,255,255,0.85); text-shadow:0 1px 3px rgba(0,0,0,0.2);">{{ nl.title }}</p>
                     <div class="flex items-center gap-3 flex-shrink-0">
-                        <p class="text-xs text-dark-400">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</p>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-dark-400 group-hover:text-primary group-hover:translate-x-1 transition-all">
-                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <p class="text-xs font-normal" style="color:rgba(255,255,255,0.4);">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</p>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:rgba(255,255,255,0.3);" class="group-hover:translate-x-1 transition-all">
+                            <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
                 {% else %}
-                <div class="bg-white/90 py-8 px-5 rounded-2xl text-center text-dark-400 text-sm">등록된 소식지가 없습니다.</div>
+                <div class="py-12 text-center text-sm font-normal" style="color:rgba(255,255,255,0.3);">등록된 소식지가 없습니다.</div>
                 {% endfor %}
             </div>
+            <a href="/newsletter/" class="inline-flex items-center gap-2 text-sm font-medium transition-smooth group" style="color:rgba(255,255,255,0.6);">
+                <span>소식지 전체보기</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
+                    <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </a>
         </div>
     </div>
 </section>
 
 <!-- DONATION SECTION -->
-<section class="w-full bg-white py-12 md:py-16 relative overflow-hidden" id="support">
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] max-w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl"></div>
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative">
-        <div class="flex flex-col gap-10">
-            <div class="flex flex-col gap-3 sm:gap-4">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient tracking-tight">함께하는 법</h2>
-                <p class="text-sm sm:text-base text-dark-500 max-w-2xl leading-relaxed">{{ sponsorship.appeal_text if sponsorship }}</p>
+<section class="w-full section-warm py-16 md:py-24" id="support" style="border-top:1px solid #e5e5e5;">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
+        <div class="flex flex-col lg:flex-row gap-10 lg:gap-16">
+            <!-- 왼쪽: 텍스트 -->
+            <div class="lg:w-[340px] flex-shrink-0">
+                <h2 class="text-2xl sm:text-3xl font-black text-dark-900 tracking-tight mb-4">함께하는 법</h2>
+                <p class="text-sm text-dark-800 font-medium leading-relaxed mb-6">{{ sponsorship.appeal_text if sponsorship }}</p>
+                <a href="/donation.html" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold text-sm rounded-full hover:opacity-90 transition-smooth">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    <span>후원하기</span>
+                </a>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="card-modern p-6 hover:border-primary/30">
-                    <h3 class="text-sm font-bold text-primary mb-3">자원활동</h3>
-                    <p class="text-sm text-dark-600 leading-relaxed mb-4">{{ sponsorship.volunteer_summary if sponsorship }}</p>
+            <!-- 오른쪽: 카드 -->
+            <div class="flex-1 flex flex-col gap-4">
+                <div class="bg-white rounded-xl border border-light-300 p-5 sm:p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-dark-900">자원활동</h3>
+                    </div>
+                    <p class="text-sm text-dark-800 font-medium leading-relaxed mb-4">{{ sponsorship.volunteer_summary if sponsorship }}</p>
                     {% if volunteer_areas %}
                     <ul class="space-y-2">
                         {% for area in volunteer_areas %}
-                        <li class="flex items-start gap-2 text-xs text-dark-500">
-                            <span class="text-primary mt-0.5">•</span>
+                        <li class="flex items-start gap-2 text-xs text-dark-800 font-medium">
+                            <span class="text-primary mt-0.5 font-bold">&middot;</span>
                             <span>{{ area.name }}{% if area.description %}: {{ area.description }}{% endif %}</span>
                         </li>
                         {% endfor %}
                     </ul>
                     {% endif %}
                 </div>
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-6">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div class="relative">
-                        <h3 class="text-sm font-bold text-primary mb-3">후원</h3>
-                        <p class="text-sm text-dark-600 leading-relaxed mb-4">{{ sponsorship.donation_summary if sponsorship }}</p>
-                        {% if donation_areas %}
-                        <ul class="space-y-2">
-                            {% for area in donation_areas %}
-                            <li class="flex items-start gap-2 text-xs text-dark-500">
-                                <span class="text-primary mt-0.5">•</span>
-                                <span>{{ area.name }}{% if area.description %}: {{ area.description }}{% endif %}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
+                <div class="bg-white rounded-xl border-2 border-primary/20 p-5 sm:p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-primary">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-primary">후원</h3>
                     </div>
+                    <p class="text-sm text-dark-800 font-medium leading-relaxed mb-4">{{ sponsorship.donation_summary if sponsorship }}</p>
+                    {% if donation_areas %}
+                    <ul class="space-y-2">
+                        {% for area in donation_areas %}
+                        <li class="flex items-start gap-2 text-xs text-dark-800 font-medium">
+                            <span class="text-primary mt-0.5 font-bold">&middot;</span>
+                            <span>{{ area.name }}{% if area.description %}: {{ area.description }}{% endif %}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
-            </div>
-            <div class="flex justify-center lg:justify-start">
-                <a href="/donation.html" class="inline-flex items-center gap-3 text-sm text-dark-500 hover:text-primary transition-smooth group">
-                    <span>자세히 보기</span>
-                    <svg width="16" height="16" viewBox="0 0 14 14" fill="none" class="group-hover:translate-x-1 transition-transform">
-                        <path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </a>
             </div>
         </div>
     </div>
@@ -346,36 +340,79 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const slides = document.querySelectorAll('.hero-slide');
-    const totalSlides = slides.length;
-    let currentSlide = 0;
-    let autoPlayInterval;
-    const heroData = [{% for photo in hero_photos %}{{ (photo.description or '') | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    /* === Typing Effect (글자 단위, 반복) === */
+    (function() {
+        var typedEl = document.getElementById('hero-typed');
+        var cursorEl = document.getElementById('hero-cursor');
+        var slogan = window.__heroSlogan || '차별없이 평등한 사회';
+        if (!typedEl) return;
 
-    function showSlide(index) {
-        slides.forEach((slide, i) => {
-            slide.classList.toggle('opacity-100', i === index);
-            slide.classList.toggle('opacity-0', i !== index);
-        });
-        document.getElementById('hero-current').textContent = index + 1;
-        if (heroData[index] !== undefined) {
-            const descEl = document.getElementById('hero-desc');
-            if (descEl) descEl.textContent = heroData[index];
+        function getGraphemes(text) {
+            if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+                var seg = new Intl.Segmenter('ko', { granularity: 'grapheme' });
+                return Array.from(seg.segment(text)).map(function(s) { return s.segment; });
+            }
+            return text.split('');
         }
-    }
-    function nextSlide() { currentSlide = (currentSlide + 1) % totalSlides; showSlide(currentSlide); }
-    function prevSlide() { currentSlide = (currentSlide - 1 + totalSlides) % totalSlides; showSlide(currentSlide); }
-    document.getElementById('hero-next')?.addEventListener('click', nextSlide);
-    document.getElementById('hero-prev')?.addEventListener('click', prevSlide);
-    if (totalSlides > 1) {
-        autoPlayInterval = setInterval(nextSlide, 5000);
-        document.getElementById('hero')?.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-        document.getElementById('hero')?.addEventListener('mouseleave', () => { autoPlayInterval = setInterval(nextSlide, 5000); });
-    }
 
-    document.querySelectorAll('.activity-card').forEach(card => {
+        // 띄어쓰기를 줄바꿈으로 변환 (앞 단어 4글자 이상일 때만)
+        var g = getGraphemes(slogan);
+        // 전체 슬로건의 줄 수 계산해서 min-height 고정
+        var lineCount = 1;
+        (function() {
+            var words = slogan.split(' ');
+            for (var i = 1; i < words.length; i++) {
+                if (words[i - 1].length >= 4) lineCount++;
+            }
+        })();
+        typedEl.parentElement.style.minHeight = (lineCount * 1.15) + 'em';
+
+        function toHtml(arr) {
+            var text = arr.join('');
+            var words = text.split(' ');
+            var result = '';
+            for (var i = 0; i < words.length; i++) {
+                if (i > 0) {
+                    result += (words[i - 1].length >= 4) ? '<br>' : ' ';
+                }
+                result += words[i];
+            }
+            return result;
+        }
+        function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+        async function typeText() {
+            for (var i = 0; i < g.length; i++) {
+                typedEl.innerHTML = toHtml(g.slice(0, i + 1));
+                if (g[i] !== ' ') await sleep(60);
+            }
+        }
+
+        async function deleteText() {
+            for (var i = g.length; i > 0; i--) {
+                typedEl.innerHTML = toHtml(g.slice(0, i - 1));
+                await sleep(30);
+            }
+        }
+
+        async function run() {
+            await sleep(300);
+            cursorEl.style.display = 'inline';
+            while (true) {
+                await typeText();
+                await sleep(3000);
+                await deleteText();
+                await sleep(500);
+            }
+        }
+
+        run();
+    })();
+
+    /* --- Activity card toggle --- */
+    document.querySelectorAll('.activity-card').forEach(function(card) {
         card.addEventListener('click', function (e) {
-            const activeEl = this.querySelector('.activity-active');
+            var activeEl = this.querySelector('.activity-active');
             if (!activeEl) return;
             if (e.target.closest('.activity-close')) {
                 activeEl.classList.add('opacity-0', 'pointer-events-none');
@@ -391,6 +428,151 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    /* === 포토 갤러리 === */
+    var wrap = document.getElementById('hero-gallery-wrap');
+    var gallery = document.getElementById('hero-gallery');
+    var pols = document.querySelectorAll('.hero-pol');
+    if (!wrap || !gallery || !pols.length) return;
+
+    // 1. 무한 루프 슬라이드 (한 방향)
+    var origItems = gallery.querySelectorAll('.hero-pol');
+    origItems.forEach(function(item) {
+        var clone = item.cloneNode(true);
+        gallery.appendChild(clone);
+    });
+    pols = gallery.querySelectorAll('.hero-pol');
+
+    var pos = 0, speed = 0.3, autoId = null, paused = false;
+    var origW = 0;
+    // 원본 세트의 총 너비 계산 (카드 너비 + gap)
+    (function calcOrigW() {
+        var items = gallery.querySelectorAll('.hero-pol');
+        var half = items.length / 2;
+        if (half > 0 && items[half]) {
+            origW = items[half].offsetLeft - items[0].offsetLeft;
+        } else {
+            origW = gallery.scrollWidth / 2;
+        }
+    })();
+
+    var galleryW = gallery.scrollWidth;
+    var wrapW = wrap.offsetWidth;
+    var maxPos = galleryW - wrapW;
+
+    function autoSlide() {
+        if (!paused) {
+            pos += speed;
+            // 원본 세트 끝에 도달하면 처음으로 되돌리기 (끊김 없음)
+            if (pos >= origW) {
+                pos -= origW;
+            }
+            gallery.style.transform = 'translateX(' + (-pos) + 'px)';
+        }
+        autoId = requestAnimationFrame(autoSlide);
+    }
+    autoId = requestAnimationFrame(autoSlide);
+
+    // 위치 정규화 함수 (무한 루프)
+    function normalizePos(p) {
+        while (p >= origW) p -= origW;
+        while (p < 0) p += origW;
+        return p;
+    }
+
+    // 3. 드래그 스크롤
+    var isDragging = false, dragStartX = 0, dragStartPos = 0, dragMoved = false;
+
+    wrap.addEventListener('mousedown', function(e) {
+        isDragging = true; dragMoved = false; paused = true;
+        dragStartX = e.clientX; dragStartPos = pos;
+        wrap.style.cursor = 'grabbing';
+        gallery.style.transition = 'none';
+    });
+    window.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+        var dx = e.clientX - dragStartX;
+        if (Math.abs(dx) > 5) dragMoved = true;
+        pos = normalizePos(dragStartPos - dx);
+        gallery.style.transform = 'translateX(' + (-pos) + 'px)';
+    });
+    window.addEventListener('mouseup', function() {
+        if (!isDragging) return;
+        isDragging = false; wrap.style.cursor = 'grab';
+        gallery.style.transition = '';
+        setTimeout(function() { paused = false; }, 2000);
+    });
+
+    // 4. 터치 지원
+    var touchStartX = 0, touchStartPos = 0, touchMoved = false;
+    wrap.addEventListener('touchstart', function(e) {
+        paused = true; touchMoved = false;
+        touchStartX = e.touches[0].clientX; touchStartPos = pos;
+        gallery.style.transition = 'none';
+    }, {passive: true});
+    wrap.addEventListener('touchmove', function(e) {
+        var dx = e.touches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 5) touchMoved = true;
+        pos = normalizePos(touchStartPos - dx);
+        gallery.style.transform = 'translateX(' + (-pos) + 'px)';
+    }, {passive: true});
+    wrap.addEventListener('touchend', function() {
+        gallery.style.transition = '';
+        setTimeout(function() { paused = false; }, 2000);
+    });
+
+    // 5. hover 시 일시정지
+    wrap.addEventListener('mouseenter', function() { if (!isDragging) paused = true; });
+    wrap.addEventListener('mouseleave', function() { if (!isDragging) paused = false; });
+
+    // 6. 리사이즈 대응
+    window.addEventListener('resize', function() {
+        galleryW = gallery.scrollWidth;
+        wrapW = wrap.offsetWidth;
+        maxPos = galleryW - wrapW;
+        // origW 재계산
+        var items = gallery.querySelectorAll('.hero-pol');
+        var half = items.length / 2;
+        if (half > 0 && items[half]) {
+            origW = items[half].offsetLeft - items[0].offsetLeft;
+        }
+    });
+
+    // 7. 라이트박스
+    var lightbox = document.getElementById('hero-lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    var lightboxClose = document.getElementById('lightbox-close');
+    var lightboxCaption = document.getElementById('lightbox-caption');
+
+    pols.forEach(function(p) {
+        p.addEventListener('click', function() {
+            if (dragMoved || touchMoved) return;
+            var img = this.querySelector('img');
+            if (!img || !lightbox) return;
+            lightboxImg.src = img.src;
+            lightboxImg.alt = img.alt;
+            // 설명 텍스트 표시
+            var descEl = this.querySelector('p');
+            if (lightboxCaption) {
+                lightboxCaption.textContent = (descEl ? descEl.textContent : '') || img.alt || '';
+                lightboxCaption.style.display = lightboxCaption.textContent ? '' : 'none';
+            }
+            lightbox.style.opacity = '1';
+            lightbox.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.style.opacity = '0';
+        lightbox.style.pointerEvents = 'none';
+        document.body.style.overflow = '';
+    }
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) lightbox.addEventListener('click', function(e) { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
 });
 </script>
 {% endblock %}

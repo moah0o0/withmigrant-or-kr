@@ -6,28 +6,44 @@
 
 {% block content %}
 <!-- MISSION SECTION -->
-<section class="w-full bg-white py-20 md:py-28">
+<section class="w-full bg-white py-16 md:py-24">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
-            <div class="flex flex-col gap-10">
-                <div class="flex flex-col gap-4">
-                    <p class="text-sm font-semibold text-primary">단체명</p>
-                    <div class="border-l-2 border-primary pl-6">
-                        <p class="text-3xl md:text-4xl font-bold text-dark-800 font-display">{{ site.org_name or '사단법인 함께하는세상' }}</p>
-                        <p class="text-sm font-medium text-dark-400 mt-2">THE WORLD OF BEING TOGETHER</p>
-                    </div>
+        <!-- 단체명 -->
+        <div class="mb-12 md:mb-14">
+            <p class="text-xs font-bold text-primary tracking-widest uppercase mb-6">단체명</p>
+            <div class="flex items-start gap-5 md:gap-6">
+                <div class="flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-light-100 flex items-center justify-center" style="border:1px solid #e5e5e5;">
+                    <img src="/static/images/logo.svg" alt="" class="w-12 h-12 md:w-14 md:h-14">
                 </div>
-                <div class="flex flex-col gap-4">
-                    <div class="border-l-2 border-primary pl-6">
-                        <p class="text-3xl md:text-4xl font-bold text-dark-800 font-display">{{ site.site_name or '양산외국인노동자의집' }}</p>
-                        <p class="text-sm font-medium text-dark-400 mt-2">YANGSAN MIGRANT WORKERS' HOUSE</p>
-                    </div>
+                <div class="pt-1">
+                    <p class="text-xl md:text-2xl font-extrabold text-dark-900 leading-tight">{{ site.org_name or '사단법인 함께하는세상' }}</p>
+                    <p class="text-xl md:text-2xl font-extrabold text-dark-900 leading-tight">{{ site.site_name or '양산외국인노동자의집' }}</p>
+                    <p class="text-xs font-semibold text-dark-500 tracking-wider mt-3 uppercase">The World of Being Together · Yangsan Migrant Workers' House</p>
                 </div>
             </div>
-            <div class="flex flex-col gap-5">
-                <p class="text-sm font-semibold text-primary">가치</p>
-                <p class="text-xl md:text-2xl font-semibold text-dark-600 leading-relaxed">
-                    고향과 가족을 떠나 낯선 이국땅에서 꿈을 키우며 살아가는 이주민들과 함께 더불어 사는 사회, 차별 없는 평등한 세상을 만들어 가고자 합니다.
+            <div class="mt-8 h-px bg-light-300"></div>
+        </div>
+
+        <div class="flex flex-col gap-12 md:gap-14">
+            <!-- 가치 -->
+            <div class="max-w-3xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-8 h-[3px] bg-primary rounded-full"></span>
+                    <p class="text-sm font-bold text-primary">가치</p>
+                </div>
+                <p class="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark-900 tracking-tight leading-snug" style="word-break:keep-all;">
+                    {{ site.vision_text or '차별없이 평등한 사회를 만들어 가고자 합니다.' }}
+                </p>
+            </div>
+
+            <!-- 비전 -->
+            <div class="max-w-3xl">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="w-8 h-[3px] bg-primary rounded-full"></span>
+                    <p class="text-sm font-bold text-primary">비전</p>
+                </div>
+                <p class="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark-900 tracking-tight leading-snug">
+                    {{ site.mission_text or '함께하면 할 수 있다!' }}
                 </p>
             </div>
         </div>
@@ -35,13 +51,12 @@
 </section>
 
 <!-- HISTORY SECTION -->
-<section class="w-full bg-light-200 py-20 md:py-28 relative overflow-hidden" id="history">
-    <div class="absolute inset-0 gradient-radial pointer-events-none opacity-50"></div>
+<section class="w-full section-warm py-14 md:py-20 relative overflow-hidden" id="history" style="border-top:1px solid #e5e5e5;">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 relative">
-        <div class="flex flex-col gap-12">
-            <div class="flex flex-col gap-3">
-                <p class="text-sm font-semibold text-primary">걸어온 길</p>
-                <h2 class="text-3xl md:text-4xl font-bold text-dark-800 tracking-tight">{{ site.site_name or '양산외국인노동자의집' }} 이야기</h2>
+        <div class="flex flex-col gap-10">
+            <div class="flex flex-col gap-2">
+                <p class="text-xs font-bold text-primary">걸어온 길</p>
+                <h2 class="text-xl md:text-2xl font-black text-dark-900 tracking-tight">{{ site.site_name or '양산외국인노동자의집' }} 이야기</h2>
             </div>
 
             <div class="flex flex-col items-center gap-8 w-full">
@@ -53,14 +68,14 @@
                                 <h3 class="text-xl md:text-2xl font-bold text-white">{{ section.title or '❶ 우리의 시작' }}</h3>
                             </div>
                             <div class="p-6 md:p-8 flex flex-col gap-6 min-h-[300px] lg:min-h-[400px]">
-                                <p class="text-lg md:text-xl font-semibold text-dark-700 leading-relaxed">{{ section.summary or section.description or '' }}</p>
+                                <p class="text-lg md:text-xl font-bold text-dark-700 leading-relaxed">{{ section.summary or section.description or '' }}</p>
                                 <p class="text-sm font-medium text-primary">{{ section.subtitle or '' }}</p>
                                 <div class="flex items-center gap-3 mt-auto pt-4 border-t border-light-300">
-                                    <button class="book-prev-btn p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-500 {% if loop.first %}opacity-30{% endif %}" {% if loop.first %}disabled{% endif %}>
+                                    <button class="book-prev-btn p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-700 {% if loop.first %}opacity-30{% endif %}" {% if loop.first %}disabled{% endif %}>
                                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                                     </button>
-                                    <span class="text-sm text-dark-400">{{ loop.index }} / {{ history_sections|length }}</span>
-                                    <button class="book-next-btn p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-500 {% if loop.last %}opacity-30{% endif %}" {% if loop.last %}disabled{% endif %}>
+                                    <span class="text-sm text-dark-700">{{ loop.index }} / {{ history_sections|length }}</span>
+                                    <button class="book-next-btn p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-700 {% if loop.last %}opacity-30{% endif %}" {% if loop.last %}disabled{% endif %}>
                                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                                     </button>
                                 </div>
@@ -71,8 +86,8 @@
                                 <div class="flex flex-col gap-3">
                                     {% for item in section.items %}
                                     <div class="flex gap-4 items-start py-2 hover:bg-light-200 rounded-xl px-3 -mx-3 transition-smooth">
-                                        <div class="w-16 flex-shrink-0"><p class="text-sm font-semibold text-primary">{{ item.year or '' }}</p></div>
-                                        <div class="flex-1"><p class="text-sm text-dark-600 leading-relaxed">{{ item.content }}</p></div>
+                                        <div class="w-16 flex-shrink-0"><p class="text-sm font-bold text-primary">{{ item.year or '' }}</p></div>
+                                        <div class="flex-1"><p class="text-sm text-dark-800 leading-relaxed">{{ item.content }}</p></div>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -86,7 +101,7 @@
                                 <h3 class="text-xl md:text-2xl font-bold text-white">❶ 우리의 시작</h3>
                             </div>
                             <div class="p-6 md:p-8 flex flex-col gap-6 min-h-[300px]">
-                                <p class="text-lg md:text-xl font-semibold text-dark-700 leading-relaxed">1997년 개소 이후, 양산외국인노동자의집은 이주민들과 함께 걸어왔습니다.</p>
+                                <p class="text-lg md:text-xl font-bold text-dark-700 leading-relaxed">1997년 개소 이후, 양산외국인노동자의집은 이주민들과 함께 걸어왔습니다.</p>
                                 <p class="text-sm font-medium text-primary">1997년 개소 이후, 쉼없이 달려온 발자취</p>
                             </div>
                         </div>
@@ -94,8 +109,8 @@
                             <div class="p-6 md:p-8">
                                 <div class="flex flex-col gap-3">
                                     <div class="flex gap-4 items-start py-2">
-                                        <div class="w-16 flex-shrink-0"><p class="text-sm font-semibold text-primary">1997년</p></div>
-                                        <div class="flex-1"><p class="text-sm text-dark-600">양산외국인노동자의집 개소</p></div>
+                                        <div class="w-16 flex-shrink-0"><p class="text-sm font-bold text-primary">1997년</p></div>
+                                        <div class="flex-1"><p class="text-sm text-dark-800">양산외국인노동자의집 개소</p></div>
                                     </div>
                                 </div>
                             </div>
@@ -105,7 +120,7 @@
                 </div>
 
                 <div class="flex gap-3 items-center">
-                    <button id="history-prev" class="p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-500">
+                    <button id="history-prev" class="p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-700">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </button>
                     <div class="flex gap-2" id="history-dots">
@@ -115,7 +130,7 @@
                         <button class="history-dot h-2 rounded-full bg-primary w-6" data-page="0"></button>
                         {% endfor %}
                     </div>
-                    <button id="history-next" class="p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-500">
+                    <button id="history-next" class="p-2 rounded-xl hover:bg-light-300 disabled:opacity-30 transition-smooth text-dark-700">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </button>
                 </div>
@@ -125,12 +140,12 @@
 </section>
 
 <!-- LOCATION SECTION -->
-<section class="w-full bg-white py-20 md:py-28" id="location">
+<section class="w-full bg-white py-14 md:py-20" id="location" style="border-top:1px solid #e5e5e5;">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
-        <div class="flex flex-col gap-12">
-            <div class="flex flex-col gap-3">
-                <h2 class="text-3xl md:text-4xl font-bold text-dark-800 tracking-tight">찾아오시는 길</h2>
-                <p class="text-base text-dark-500">{{ site.site_name or '양산외국인노동자의집' }} 오시는 길을 안내해드립니다</p>
+        <div class="flex flex-col gap-10">
+            <div class="flex flex-col gap-2">
+                <h2 class="text-xl md:text-2xl font-black text-dark-900 tracking-tight">찾아오시는 길</h2>
+                <p class="text-sm text-dark-700 font-medium">{{ site.site_name or '양산외국인노동자의집' }} 오시는 길을 안내해드립니다</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -143,26 +158,26 @@
                 <div class="flex flex-col">
                     <div class="flex flex-col divide-y divide-light-300">
                         <div class="flex gap-5 py-5">
-                            <div class="w-24 flex-shrink-0"><p class="text-sm font-semibold text-dark-800">대표번호</p></div>
-                            <div class="flex-1"><p class="text-sm text-dark-500">{{ site.tel or '055-388-0988' }}</p></div>
+                            <div class="w-24 flex-shrink-0"><p class="text-sm font-bold text-dark-800">대표번호</p></div>
+                            <div class="flex-1"><p class="text-sm text-dark-700">{{ site.tel or '055-388-0988' }}</p></div>
                         </div>
                         <div class="flex gap-5 py-5">
-                            <div class="w-24 flex-shrink-0"><p class="text-sm font-semibold text-dark-800">사무실</p></div>
-                            <div class="flex-1"><p class="text-sm text-dark-500 leading-relaxed">{{ site.address or '경상남도 양산시 북안북7길35 양산시근로자종합복지관 1층' }}</p></div>
+                            <div class="w-24 flex-shrink-0"><p class="text-sm font-bold text-dark-800">사무실</p></div>
+                            <div class="flex-1"><p class="text-sm text-dark-700 leading-relaxed">{{ site.address or '경상남도 양산시 북안북7길35 양산시근로자종합복지관 1층' }}</p></div>
                         </div>
                         <div class="flex gap-5 py-5">
-                            <div class="w-24 flex-shrink-0"><p class="text-sm font-semibold text-dark-800">팩스번호</p></div>
-                            <div class="flex-1"><p class="text-sm text-dark-500">{{ site.fax or '055-366-0988' }}</p></div>
+                            <div class="w-24 flex-shrink-0"><p class="text-sm font-bold text-dark-800">팩스번호</p></div>
+                            <div class="flex-1"><p class="text-sm text-dark-700">{{ site.fax or '055-366-0988' }}</p></div>
                         </div>
                         <div class="flex gap-5 py-5">
-                            <div class="w-24 flex-shrink-0"><p class="text-sm font-semibold text-dark-800">이메일</p></div>
-                            <div class="flex-1"><p class="text-sm text-dark-500">{{ site.email or 'happysoli@hanmail.net' }}</p></div>
+                            <div class="w-24 flex-shrink-0"><p class="text-sm font-bold text-dark-800">이메일</p></div>
+                            <div class="flex-1"><p class="text-sm text-dark-700">{{ site.email or 'happysoli@hanmail.net' }}</p></div>
                         </div>
                         <div class="flex gap-5 py-5">
-                            <div class="w-24 flex-shrink-0"><p class="text-sm font-semibold text-dark-800">운영 시간</p></div>
+                            <div class="w-24 flex-shrink-0"><p class="text-sm font-bold text-dark-800">운영 시간</p></div>
                             <div class="flex-1">
-                                {% if office_info and office_info.office_hours %}<p class="text-sm text-dark-500 whitespace-pre-line">{{ office_info.office_hours }}</p>{% else %}<p class="text-sm text-dark-500">평일 09:00 - 18:00</p>{% endif %}
-                                {% if office_info and office_info.closed_days %}<p class="text-sm text-dark-400 mt-1">{{ office_info.closed_days }}</p>{% endif %}
+                                {% if office_info and office_info.office_hours %}<p class="text-sm text-dark-700 whitespace-pre-line">{{ office_info.office_hours }}</p>{% else %}<p class="text-sm text-dark-700">평일 09:00 - 18:00</p>{% endif %}
+                                {% if office_info and office_info.closed_days %}<p class="text-sm text-dark-700 mt-1">{{ office_info.closed_days }}</p>{% endif %}
                                 {% if operating_hours %}<button onclick="openHoursModal()" class="text-sm text-primary hover:underline mt-2 inline-flex items-center gap-1">주요 사업별 운영시간 보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>{% endif %}
                             </div>
                         </div>
@@ -172,21 +187,21 @@
                     <div class="mt-8 card-modern p-6">
                         {% if bus_stops %}
                         <div class="mb-6">
-                            <h3 class="text-sm font-semibold text-dark-800 mb-3">주변 정류장</h3>
-                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-dark-600">
+                            <h3 class="text-sm font-bold text-dark-800 mb-3">주변 정류장</h3>
+                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-dark-800">
                                 {% set circled_numbers = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'] %}
                                 {% for stop in bus_stops %}
-                                <span><span class="text-dark-400">{{ circled_numbers[loop.index0] if loop.index0 < 10 else loop.index ~ '.' }}</span> {{ stop.name }}</span>
+                                <span><span class="text-dark-700">{{ circled_numbers[loop.index0] if loop.index0 < 10 else loop.index ~ '.' }}</span> {{ stop.name }}</span>
                                 {% endfor %}
                             </div>
                         </div>
                         {% endif %}
                         {% if routes_by_type %}
                         <div>
-                            <h3 class="text-sm font-semibold text-dark-800 mb-3">주변 버스</h3>
-                            {% if routes_by_type['일반'] %}<div class="flex flex-wrap items-start gap-1.5 mb-3"><span class="px-2 py-0.5 bg-green-600 text-white text-xs font-medium rounded">일반</span><span class="text-sm text-dark-600 leading-relaxed">{{ routes_by_type['일반']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
-                            {% if routes_by_type['좌석'] %}<div class="flex flex-wrap items-start gap-1.5 mb-3"><span class="px-2 py-0.5 bg-red-500 text-white text-xs font-medium rounded">좌석</span><span class="text-sm text-dark-600">{{ routes_by_type['좌석']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
-                            {% if routes_by_type['마을'] %}<div class="flex flex-wrap items-start gap-1.5"><span class="px-2 py-0.5 bg-green-600 text-white text-xs font-medium rounded">마을</span><span class="text-sm text-dark-600">{{ routes_by_type['마을']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
+                            <h3 class="text-sm font-bold text-dark-800 mb-3">주변 버스</h3>
+                            {% if routes_by_type['일반'] %}<div class="flex flex-wrap items-start gap-1.5 mb-3"><span class="px-2 py-0.5 bg-green-600 text-white text-xs font-medium rounded">일반</span><span class="text-sm text-dark-800 leading-relaxed">{{ routes_by_type['일반']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
+                            {% if routes_by_type['좌석'] %}<div class="flex flex-wrap items-start gap-1.5 mb-3"><span class="px-2 py-0.5 bg-red-500 text-white text-xs font-medium rounded">좌석</span><span class="text-sm text-dark-800">{{ routes_by_type['좌석']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
+                            {% if routes_by_type['마을'] %}<div class="flex flex-wrap items-start gap-1.5"><span class="px-2 py-0.5 bg-green-600 text-white text-xs font-medium rounded">마을</span><span class="text-sm text-dark-800">{{ routes_by_type['마을']|map(attribute='name')|join(' ') }}</span></div>{% endif %}
                         </div>
                         {% endif %}
                     </div>
@@ -202,22 +217,22 @@
     <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-lg mx-4 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-dark-800">주요 사업별 운영시간</h3>
-            <button onclick="closeHoursModal()" class="text-dark-400 hover:text-dark-600 transition-colors">
+            <button onclick="closeHoursModal()" class="text-dark-700 hover:text-dark-800 transition-colors">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         </div>
         <div class="space-y-5">
             {% for program in operating_hours %}
             <div class="border-b border-light-300 pb-4 last:border-0">
-                <h4 class="font-semibold text-dark-700 mb-2">{{ program.name }}</h4>
-                <p class="text-sm text-dark-500 whitespace-pre-line">{{ program.schedule }}</p>
+                <h4 class="font-bold text-dark-700 mb-2">{{ program.name }}</h4>
+                <p class="text-sm text-dark-700 whitespace-pre-line">{{ program.schedule }}</p>
             </div>
             {% endfor %}
             {% if office_info and (office_info.office_hours or office_info.closed_days) %}
             <div class="pt-4 border-t border-primary/20">
-                <h4 class="font-semibold text-primary mb-2">사무실 근무시간</h4>
-                {% if office_info.office_hours %}<p class="text-sm text-dark-500 whitespace-pre-line">{{ office_info.office_hours }}</p>{% endif %}
-                {% if office_info.closed_days %}<p class="text-sm text-dark-400 mt-2">{{ office_info.closed_days }}</p>{% endif %}
+                <h4 class="font-bold text-primary mb-2">사무실 근무시간</h4>
+                {% if office_info.office_hours %}<p class="text-sm text-dark-700 whitespace-pre-line">{{ office_info.office_hours }}</p>{% endif %}
+                {% if office_info.closed_days %}<p class="text-sm text-dark-700 mt-2">{{ office_info.closed_days }}</p>{% endif %}
             </div>
             {% endif %}
         </div>

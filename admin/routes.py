@@ -724,6 +724,13 @@ def site_info():
         info.instagram = request.form.get('instagram', '')
         info.youtube = request.form.get('youtube', '')
 
+        # 소개 페이지
+        info.vision_text = request.form.get('vision_text', '')
+        info.mission_text = request.form.get('mission_text', '')
+
+        # 로고 텍스트 색상
+        info.logo_text_color = request.form.get('logo_text_color', '#3a1671')
+
         db.session.commit()
         flash('사이트 정보가 저장되었습니다.', 'success')
 

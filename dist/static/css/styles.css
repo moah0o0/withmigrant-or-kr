@@ -55,6 +55,102 @@
     }
 }
 
+/* Hero Section - 폴라로이드 갤러리 */
+.hero-gallery-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    cursor: grab;
+    -webkit-user-select: none;
+    user-select: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.hero-gallery-wrap::-webkit-scrollbar {
+    display: none;
+}
+
+.hero-gallery-wrap:active {
+    cursor: grabbing;
+}
+
+.hero-gallery {
+    display: flex;
+    gap: 24px;
+    padding: 20px 40px 40px;
+    will-change: transform;
+    transition: transform 0.05s linear;
+}
+
+.hero-polaroid {
+    flex-shrink: 0;
+    width: 260px;
+    background: white;
+    padding: 12px 12px 40px;
+    border-radius: 4px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.4s cubic-bezier(.25,.46,.45,.94), box-shadow 0.3s ease;
+    opacity: 0;
+    animation: polaroid-in 0.6s ease both;
+}
+
+.hero-polaroid:nth-child(1) { animation-delay: 0.1s; }
+.hero-polaroid:nth-child(2) { animation-delay: 0.2s; }
+.hero-polaroid:nth-child(3) { animation-delay: 0.3s; }
+.hero-polaroid:nth-child(4) { animation-delay: 0.4s; }
+.hero-polaroid:nth-child(5) { animation-delay: 0.5s; }
+
+.hero-polaroid:hover {
+    transform: rotate(0deg) scale(1.05) !important;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.hero-polaroid-inner {
+    overflow: hidden;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.hero-polaroid-inner img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.hero-polaroid:hover .hero-polaroid-inner img {
+    transform: scale(1.05);
+}
+
+@keyframes polaroid-in {
+    from { opacity: 0; transform: translateY(30px) rotate(0deg); }
+    to { opacity: 1; }
+}
+
+@media (min-width: 768px) {
+    .hero-polaroid {
+        width: 340px;
+        padding: 14px 14px 48px;
+    }
+    .hero-gallery {
+        gap: 32px;
+        padding: 24px 60px 48px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .hero-polaroid {
+        width: 420px;
+        padding: 16px 16px 56px;
+    }
+    .hero-gallery {
+        gap: 40px;
+        padding: 30px 80px 56px;
+    }
+}
+
 /* Logo */
 .logo-link {
     text-decoration: none;

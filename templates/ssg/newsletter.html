@@ -5,71 +5,126 @@
 {% block og_url %}/newsletter/{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="bg-dark-800 py-12 md:py-16">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">소식지 '사람이 사람에게'</h1>
-            <p class="text-base text-white/70 max-w-xl mx-auto">더 많은 사람들이 이주민과 더불어 살아갈 수 있도록, 이주민 인권 문제에 관심을 가지고 참여할 수 있기를</p>
-        </div>
+<!-- Page Header -->
+<section class="w-full bg-white border-b border-light-300">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-14">
+        <h1 class="text-3xl sm:text-4xl font-black text-dark-900 tracking-tight mb-2">소식지</h1>
+        <p class="text-sm text-dark-700 font-medium">더 많은 사람들이 이주민과 더불어 살아갈 수 있도록</p>
     </div>
 </section>
 
 <!-- Main Content -->
-<section class="bg-light-100 py-10 md:py-14">
-    <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
+<section class="w-full section-warm py-10 md:py-14">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
         {% if pagination.items %}
-        <div class="space-y-4">
+        <!-- 연도 필터 -->
+        <div class="flex flex-wrap gap-2 mb-6" id="year-filter">
+            <button type="button" class="year-btn px-4 py-2 text-sm font-bold rounded-lg border transition-smooth bg-dark-900 text-white border-dark-900" data-year="all">전체</button>
+            {% set years = [] %}
             {% for nl in pagination.items %}
-            <article class="bg-white rounded-lg border border-light-300 hover:border-primary/30 hover:shadow-sm transition-all">
-                <div class="p-5 flex items-start justify-between gap-4">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="text-xs text-dark-400 font-medium">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-dark-800 mb-1 line-clamp-1">
-                            <a href="/newsletter/{{ nl.id }}.html" class="hover:text-primary transition-colors">{{ nl.title }}</a>
-                        </h3>
-                        {% if nl.description %}<p class="text-sm text-dark-500 line-clamp-2">{{ nl.description }}</p>{% endif %}
-                    </div>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <a href="/newsletter/{{ nl.id }}.html" class="px-4 py-2 bg-dark-800 hover:bg-dark-700 text-white text-sm font-medium rounded-lg transition-colors">읽기</a>
-                        {% if nl.external_url %}
-                        <a href="{{ nl.external_url }}" target="_blank" rel="noopener noreferrer"
-                           class="w-10 h-10 flex items-center justify-center border border-light-300 hover:border-primary hover:text-primary rounded-lg text-dark-400 transition-colors" title="원본 보기">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                                <polyline points="15 3 21 3 21 9"/>
-                                <line x1="10" y1="14" x2="21" y2="3"/>
-                            </svg>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </article>
+                {% if nl.published_at %}
+                    {% set y = nl.published_at.strftime('%Y') %}
+                    {% if y not in years %}
+                        {% if years.append(y) %}{% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% for y in years|sort(reverse=true) %}
+            <button type="button" class="year-btn px-4 py-2 text-sm font-bold rounded-lg border transition-smooth bg-white text-dark-700 border-light-300 hover:border-dark-900" data-year="{{ y }}">{{ y }}년</button>
             {% endfor %}
         </div>
+
+        <div class="bg-white rounded-xl border border-light-300 overflow-hidden" id="newsletter-list">
+            {% for nl in pagination.items %}
+            <a href="/newsletter/{{ nl.id }}.html" data-year="{{ nl.published_at.strftime('%Y') if nl.published_at else '' }}"
+               class="nl-item group flex items-center justify-between gap-4 px-4 sm:px-5 py-4 hover:bg-light-100 transition-smooth border-b border-light-300 last:border-b-0">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ nl.title }}</h3>
+                    {% if nl.description %}
+                    <p class="text-xs text-dark-700 font-medium mt-1 truncate">{{ nl.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="text-xs text-dark-700 font-medium hidden sm:block">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</span>
+                    {% if nl.external_url %}
+                    <span class="px-2.5 py-1 bg-light-200 text-dark-700 text-xs font-bold rounded-md">원본</span>
+                    {% endif %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-dark-700 group-hover:text-primary group-hover:translate-x-1 transition-all"><path d="M9 6L15 12L9 18"/></svg>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div id="no-results" class="text-center py-16 hidden">
+            <h3 class="text-lg font-bold text-dark-900 mb-2">해당 연도의 소식지가 없습니다</h3>
+        </div>
         {% else %}
-        <div class="text-center py-16 bg-white rounded-lg border border-light-300">
-            <div class="text-4xl mb-4">📬</div>
-            <h3 class="text-lg font-semibold text-dark-800 mb-2">등록된 소식지가 없습니다</h3>
-            <p class="text-dark-500">새로운 소식지가 곧 발행될 예정입니다.</p>
+        <div class="text-center py-20">
+            <h3 class="text-lg font-bold text-dark-900 mb-2">등록된 소식지가 없습니다</h3>
+            <p class="text-sm text-dark-700 font-medium">새로운 소식지가 곧 발행될 예정입니다.</p>
         </div>
         {% endif %}
 
         {% if pagination.pages > 1 %}
-        <div class="flex items-center justify-center gap-2 mt-10">
+        <div class="flex items-center justify-center gap-1 mt-10" id="pagination-wrap">
             {% if pagination.has_prev %}
             <a href="{% if pagination.prev_num == 1 %}/newsletter/{% else %}/newsletter/page/{{ pagination.prev_num }}.html{% endif %}"
-               class="px-4 py-2 bg-white border border-light-300 rounded-lg text-dark-600 hover:bg-light-100 transition-colors">← 이전</a>
+               class="w-10 h-10 flex items-center justify-center rounded-lg border border-light-300 bg-white text-dark-700 hover:border-dark-900 transition-smooth">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18L9 12L15 6"/></svg>
+            </a>
             {% endif %}
-            <span class="px-4 text-sm text-dark-500">{{ pagination.page }} / {{ pagination.pages }}</span>
+            {% for page in range(1, pagination.pages + 1) %}
+                {% if page == pagination.page %}
+                <span class="w-10 h-10 rounded-lg bg-dark-900 text-white font-bold flex items-center justify-center text-sm">{{ page }}</span>
+                {% else %}
+                <a href="{% if page == 1 %}/newsletter/{% else %}/newsletter/page/{{ page }}.html{% endif %}"
+                   class="w-10 h-10 rounded-lg border border-light-300 bg-white text-dark-700 font-bold flex items-center justify-center text-sm hover:border-dark-900 transition-smooth">{{ page }}</a>
+                {% endif %}
+            {% endfor %}
             {% if pagination.has_next %}
             <a href="/newsletter/page/{{ pagination.next_num }}.html"
-               class="px-4 py-2 bg-white border border-light-300 rounded-lg text-dark-600 hover:bg-light-100 transition-colors">다음 →</a>
+               class="w-10 h-10 flex items-center justify-center rounded-lg border border-light-300 bg-white text-dark-700 hover:border-dark-900 transition-smooth">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6L15 12L9 18"/></svg>
+            </a>
             {% endif %}
         </div>
         {% endif %}
     </div>
 </section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btns = document.querySelectorAll('.year-btn');
+    var items = document.querySelectorAll('.nl-item');
+    var noResults = document.getElementById('no-results');
+    var pagination = document.getElementById('pagination-wrap');
+    if (!btns.length) return;
+
+    btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var year = this.dataset.year;
+            btns.forEach(function(b) {
+                b.classList.remove('bg-dark-900', 'text-white', 'border-dark-900');
+                b.classList.add('bg-white', 'text-dark-700', 'border-light-300');
+            });
+            this.classList.remove('bg-white', 'text-dark-700', 'border-light-300');
+            this.classList.add('bg-dark-900', 'text-white', 'border-dark-900');
+
+            var visible = 0;
+            items.forEach(function(item) {
+                if (year === 'all' || item.dataset.year === year) {
+                    item.style.display = '';
+                    visible++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            if (noResults) noResults.classList.toggle('hidden', visible > 0);
+            if (pagination) pagination.style.display = year === 'all' ? '' : 'none';
+        });
+    });
+});
+</script>
 {% endblock %}

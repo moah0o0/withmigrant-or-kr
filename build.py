@@ -63,7 +63,6 @@ def create_app():
     app.jinja_env.globals['SEO'] = Config.SEO_DEFAULTS
     app.jinja_env.globals['now'] = datetime.now()
     app.jinja_env.globals['build_time'] = datetime.now().isoformat()
-
     db.init_app(app)
     return app
 
@@ -692,6 +691,13 @@ def main():
 
     # Flask 앱 생성
     app = create_app()
+
+    # DB에서 로고 텍스트 색상 읽기
+    with app.app_context():
+        site_info = SiteInfo.query.first()
+        logo_color = (site_info.logo_text_color if site_info and site_info.logo_text_color
+                      else Config.LOGO_TEXT_COLOR)
+        app.jinja_env.globals['LOGO_TEXT_COLOR'] = logo_color
 
     # 정적 파일 복사
     print("\n[1/3] 정적 파일 복사")

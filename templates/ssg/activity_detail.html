@@ -6,99 +6,82 @@
 {% block og_title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-<article class="bg-white">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="pt-6 pb-4">
-            <a href="/activity/" class="inline-flex items-center gap-2 text-dark-500 hover:text-primary transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18L9 12L15 6"/></svg>
-                <span class="font-medium">목록으로</span>
-            </a>
+<!-- Page Header -->
+<section class="w-full bg-white border-b border-light-300">
+    <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-8">
+        <a href="/activity/" class="inline-flex items-center gap-2 text-dark-700 hover:text-primary transition-smooth font-bold text-sm mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18L9 12L15 6"/></svg>
+            <span>목록으로</span>
+        </a>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-dark-900 leading-tight mb-4">{{ post.title }}</h1>
+        <div class="flex flex-wrap items-center gap-3 text-sm">
+            {% if post.category %}
+            {% set cat_color = '#7c3aed' %}{% for c in categories %}{% if c.name == post.category %}{% set cat_color = c.color %}{% endif %}{% endfor %}
+            <span class="text-xs font-bold" style="color:{{ cat_color }};">#{{ post.category }}</span>
+            <span class="w-1 h-1 rounded-full bg-dark-700/30"></span>
+            {% endif %}
+            <time class="text-dark-700 font-medium" datetime="{{ post.created_at.isoformat() if post.created_at else '' }}">{{ post.created_at.strftime('%Y년 %m월 %d일') if post.created_at else '' }}</time>
         </div>
+    </div>
+</section>
 
-        <header class="pb-6 border-b border-light-200">
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-black text-dark-800 leading-tight mb-6">{{ post.title }}</h1>
-            <div class="flex flex-wrap items-center gap-4 text-sm text-dark-400">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-primary"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </div>
-                    <span class="font-semibold text-dark-600">관리자</span>
-                </div>
-                <span class="w-1 h-1 rounded-full bg-dark-300"></span>
-                <time datetime="{{ post.created_at.isoformat() if post.created_at else '' }}">{{ post.created_at.strftime('%Y년 %m월 %d일') if post.created_at else '' }}</time>
-            </div>
-        </header>
-
-        <div class="py-10 md:py-12">
+<!-- Article Body -->
+<section class="w-full section-warm py-10 md:py-14">
+    <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl border border-light-300 p-5 sm:p-8 md:p-10">
             <div class="prose-content">{{ post.content | fix_upload_urls | safe }}</div>
         </div>
 
         {% if post.attachments and post.attachments|length > 0 %}
-        <div class="py-8 border-t border-light-200">
-            <h3 class="text-lg font-bold text-dark-800 mb-4 flex items-center gap-2">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-400"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        <div class="mt-6 bg-white rounded-xl border border-light-300 p-5 sm:p-6">
+            <h3 class="text-sm font-bold text-dark-900 mb-4 flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-dark-700"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                 첨부파일
             </h3>
             <div class="space-y-2">
                 {% for file in post.attachments %}
-                <a href="{{ API_DOMAIN }}/download/{{ file.id }}" class="group flex items-center justify-between p-4 bg-light-100 hover:bg-light-200 rounded-xl transition-colors">
+                <a href="{{ API_DOMAIN }}/download/{{ file.id }}" class="group flex items-center justify-between p-3 bg-light-100 hover:bg-light-200 rounded-lg transition-smooth">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        </div>
-                        <span class="font-medium text-dark-700 group-hover:text-primary transition-colors truncate">{{ file.original_filename }}</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-700 flex-shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="text-sm font-bold text-dark-800 group-hover:text-primary transition-smooth truncate">{{ file.original_filename }}</span>
                     </div>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-400 group-hover:text-primary transition-colors"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-700 group-hover:text-primary transition-smooth flex-shrink-0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </a>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {% if post.category %}
-        <div class="py-8 border-t border-light-200">
-            <div class="flex items-center gap-3">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-400"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                <a href="/activity/category/{{ post.category.replace(' ', '-') }}/"
-                   class="px-4 py-2 rounded-full text-sm font-semibold transition-all hover:shadow-md"
-                   style="background-color: {{ (category_obj.color if category_obj else '#6d28d9') }}15; color: {{ category_obj.color if category_obj else '#6d28d9' }}">#{{ post.category }}</a>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="py-8 border-t border-light-200">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-dark-400">공유하기</span>
-                    <button onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다.')" class="w-10 h-10 rounded-full bg-light-200 hover:bg-light-300 flex items-center justify-center transition-colors">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dark-500"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    </button>
-                </div>
-                <a href="/activity/" class="px-6 py-3 bg-light-200 hover:bg-light-300 text-dark-600 font-semibold rounded-full transition-colors">목록으로 돌아가기</a>
-            </div>
+        <!-- Actions -->
+        <div class="flex items-center justify-between mt-8">
+            <button onclick="navigator.clipboard.writeText(window.location.href); alert('링크가 복사되었습니다.')"
+                    class="inline-flex items-center gap-2 text-sm font-bold text-dark-700 hover:text-primary transition-smooth">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span>링크 복사</span>
+            </button>
+            <a href="/activity/" class="inline-flex items-center gap-2 px-5 py-2.5 bg-dark-900 text-white font-bold text-sm rounded-lg hover:bg-dark-800 transition-smooth">
+                목록으로
+            </a>
         </div>
     </div>
-</article>
+</section>
 
 {% if related_posts %}
-<section class="bg-light-100 py-16 md:py-20">
-    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-dark-800 mb-8 text-center">관련 활동</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<section class="w-full bg-white py-10 md:py-14 border-t border-light-300">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-lg font-bold text-dark-900 mb-6">관련 활동</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for related in related_posts %}
-            <a href="/activity/{{ related.id }}.html" class="group">
-                <article class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
-                    <div class="relative aspect-[16/10] overflow-hidden">
-                        {% if related.image_url %}
-                        <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                        {% else %}
-                        <div class="w-full h-full bg-gradient-to-br from-dark-700 to-dark-800 flex flex-col justify-center p-4">
-                            <h4 class="text-sm font-bold text-white line-clamp-3 leading-snug">{{ related.title }}</h4>
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="p-5"><h3 class="font-bold text-dark-800 group-hover:text-primary transition-colors line-clamp-2">{{ related.title }}</h3></div>
-                </article>
+            <a href="/activity/{{ related.id }}.html" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden hover:border-primary/30 transition-smooth">
+                {% if related.image_url %}
+                <div class="aspect-[4/3] overflow-hidden bg-light-200">
+                    <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                {% endif %}
+                <div class="flex flex-col gap-1.5 p-4 flex-1">
+                    <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth line-clamp-2 leading-snug">{{ related.title }}</h3>
+                    <p class="text-xs text-dark-700 font-medium mt-auto pt-2">{{ related.created_at.strftime('%Y.%m.%d') if related.created_at else '' }}</p>
+                </div>
             </a>
             {% endfor %}
         </div>
