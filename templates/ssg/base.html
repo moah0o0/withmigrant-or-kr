@@ -110,6 +110,14 @@
             letter-spacing: -0.02em;
         }
 
+        html {
+            font-size: 110%;
+        }
+
+        @media (max-width: 767px) {
+            html { font-size: 100%; }
+        }
+
         body {
             font-weight: 600;
         }
@@ -239,7 +247,8 @@
         @media (max-width: 767px) {
             html { -webkit-text-size-adjust: 100%; }
             body { -webkit-tap-highlight-color: transparent; }
-            a, button { -webkit-tap-highlight-color: transparent; min-height: 44px; }
+            a, button { -webkit-tap-highlight-color: transparent; }
+            nav a, .btn-primary, .btn-outline, [role="button"] { min-height: 44px; }
             input, select, textarea { font-size: 16px !important; } /* iOS 줌 방지 */
         }
 

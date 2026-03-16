@@ -6,17 +6,25 @@
 
 {% block content %}
 <!-- QUICK INFO BAR -->
-<div class="w-full" style="background:#f0ecf9;">
-    <div class="max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-12 py-2 sm:py-3">
-        <div class="flex items-center gap-2 min-w-0 overflow-hidden" style="height:1.4em;">
-            <span class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-            <span class="text-[11px] sm:text-xs font-bold text-primary flex-shrink-0">공지</span>
-            <div id="ticker-wrap" class="flex-1 min-w-0 overflow-hidden relative" style="height:1.4em;">
+<style>
+    @media (min-width: 768px) {
+        #ticker-bar { font-size: 13px; }
+        #ticker-bar .ticker-item { font-size: 13px !important; line-height: 24px !important; }
+        #ticker-bar > div > div { height: 24px !important; }
+        #ticker-wrap { height: 24px !important; }
+    }
+</style>
+<div id="ticker-bar" class="w-full" style="background:#f0ecf9;">
+    <div class="max-w-[1200px] mx-auto px-3 sm:px-6 lg:px-12 py-2 md:py-3">
+        <div class="flex items-center gap-2 min-w-0 overflow-hidden" style="height:20px;">
+            <span class="flex-shrink-0 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary animate-pulse"></span>
+            <span class="flex-shrink-0 font-bold text-primary" style="font-size:11px;">공지</span>
+            <div id="ticker-wrap" class="flex-1 min-w-0 overflow-hidden relative" style="height:20px;">
                 {% if notice_cards %}
                 {% for item in notice_cards[:3] %}
                 <a href="/notice/{{ item.notice.id }}.html"
-                    class="ticker-item absolute inset-0 flex items-center text-[11px] sm:text-xs font-bold text-dark-800 truncate hover:text-primary transition-smooth {% if loop.first %}{% else %}opacity-0 pointer-events-none{% endif %}"
-                    style="transition:opacity 0.4s;">
+                    class="ticker-item absolute inset-0 flex items-center font-bold text-dark-800 truncate hover:text-primary {% if loop.first %}{% else %}opacity-0 pointer-events-none{% endif %}"
+                    style="transition:opacity 0.4s; font-size:11px; line-height:20px;">
                     {{ item.notice.title }}
                 </a>
                 {% endfor %}
