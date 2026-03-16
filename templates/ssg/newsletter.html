@@ -7,19 +7,22 @@
 {% block content %}
 <!-- Page Header -->
 <section class="w-full bg-white border-b border-light-300">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-14">
-        <h1 class="text-3xl sm:text-4xl font-black text-dark-900 tracking-tight mb-2">소식지</h1>
-        <p class="text-sm text-dark-700 font-medium">더 많은 사람들이 이주민과 더불어 살아갈 수 있도록</p>
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-dark-900 tracking-tight mb-2">소식지</h1>
+                <p class="text-xs sm:text-sm text-dark-700 font-medium">더 많은 사람들이 이주민과 더불어 살아갈 수 있도록</p>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- Main Content -->
-<section class="w-full section-warm py-10 md:py-14">
+<!-- 연도 필터 -->
+{% if pagination.items %}
+<section class="sticky top-[62px] md:top-[72px] z-40 bg-white border-b border-light-300">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
-        {% if pagination.items %}
-        <!-- 연도 필터 -->
-        <div class="flex flex-wrap gap-2 mb-6" id="year-filter">
-            <button type="button" class="year-btn px-4 py-2 text-sm font-bold rounded-lg border transition-smooth bg-dark-900 text-white border-dark-900" data-year="all">전체</button>
+        <div class="flex gap-2 py-3 overflow-x-auto" style="-ms-overflow-style:none;scrollbar-width:none;" id="year-filter">
+            <button type="button" class="year-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-smooth flex-shrink-0 bg-dark-900 text-white" data-year="all">전체</button>
             {% set years = [] %}
             {% for nl in pagination.items %}
                 {% if nl.published_at %}
@@ -30,32 +33,56 @@
                 {% endif %}
             {% endfor %}
             {% for y in years|sort(reverse=true) %}
-            <button type="button" class="year-btn px-4 py-2 text-sm font-bold rounded-lg border transition-smooth bg-white text-dark-700 border-light-300 hover:border-dark-900" data-year="{{ y }}">{{ y }}년</button>
+            <button type="button" class="year-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-smooth flex-shrink-0 bg-light-200 text-dark-700 hover:bg-light-300" data-year="{{ y }}">{{ y }}년</button>
             {% endfor %}
         </div>
+    </div>
+</section>
+{% endif %}
 
-        <div class="bg-white rounded-xl border border-light-300 overflow-hidden" id="newsletter-list">
+<!-- Main Content -->
+<section class="w-full section-warm py-8 md:py-14">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
+        {% if pagination.items %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="nl-grid">
             {% for nl in pagination.items %}
-            <a href="/newsletter/{{ nl.id }}.html" data-year="{{ nl.published_at.strftime('%Y') if nl.published_at else '' }}"
-               class="nl-item group flex items-center justify-between gap-4 px-4 sm:px-5 py-4 hover:bg-light-100 transition-smooth border-b border-light-300 last:border-b-0">
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ nl.title }}</h3>
-                    {% if nl.description %}
-                    <p class="text-xs text-dark-700 font-medium mt-1 truncate">{{ nl.description }}</p>
-                    {% endif %}
+            <a href="/newsletter/{{ nl.id }}.html" data-year="{{ nl.published_at.strftime('%Y') if nl.published_at else '' }}" data-title="{{ nl.title }}"
+               class="nl-item group flex flex-col rounded-xl overflow-hidden bg-white border border-light-300 hover:border-primary/30 hover:shadow-md transition-all duration-300">
+                <!-- 상단 컬러 영역 -->
+                <div class="relative px-5 py-6 md:px-6 md:py-8" style="background:linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            {% if nl.issue_number %}
+                            <p class="text-white/60 text-[10px] sm:text-xs font-bold mb-1">vol.{{ nl.issue_number }}</p>
+                            {% endif %}
+                            <p class="text-white text-lg sm:text-xl font-black leading-tight">{{ nl.published_at.strftime('%Y') if nl.published_at else '' }}</p>
+                            <p class="text-white/80 text-xs sm:text-sm font-bold mt-0.5">{{ nl.published_at.strftime('%m월') if nl.published_at else '' }}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 flex-shrink-0">
-                    <span class="text-xs text-dark-700 font-medium hidden sm:block">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</span>
-                    {% if nl.external_url %}
-                    <span class="px-2.5 py-1 bg-light-200 text-dark-700 text-xs font-bold rounded-md">원본</span>
+                <!-- 하단 정보 -->
+                <div class="flex flex-col gap-1.5 p-4 md:p-5 flex-1">
+                    <h3 class="text-xs sm:text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth line-clamp-2 leading-snug" style="word-break:keep-all;">{{ nl.title }}</h3>
+                    {% if nl.description %}
+                    <p class="text-[11px] sm:text-xs text-dark-500 font-medium line-clamp-2 leading-relaxed">{{ nl.description }}</p>
                     {% endif %}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-dark-700 group-hover:text-primary group-hover:translate-x-1 transition-all"><path d="M9 6L15 12L9 18"/></svg>
+                    <div class="flex items-center gap-2 mt-auto pt-2">
+                        <p class="text-[11px] sm:text-xs text-dark-500 font-medium">{{ nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '' }}</p>
+                        {% if nl.external_url %}
+                        <span class="px-1.5 py-0.5 bg-light-200 text-dark-500 text-[9px] sm:text-[10px] font-bold rounded">외부링크</span>
+                        {% endif %}
+                    </div>
                 </div>
             </a>
             {% endfor %}
         </div>
-        <div id="no-results" class="text-center py-16 hidden">
-            <h3 class="text-lg font-bold text-dark-900 mb-2">해당 연도의 소식지가 없습니다</h3>
+
+        <!-- 검색/필터 결과 없음 -->
+        <div id="no-results" class="hidden text-center py-16">
+            <h3 class="text-sm font-bold text-dark-900 mb-1">해당 연도의 소식지가 없습니다</h3>
         </div>
         {% else %}
         <div class="text-center py-20">
@@ -90,7 +117,6 @@
         {% endif %}
     </div>
 </section>
-
 {% endblock %}
 
 {% block scripts %}
@@ -105,12 +131,13 @@ document.addEventListener('DOMContentLoaded', function() {
     btns.forEach(function(btn) {
         btn.addEventListener('click', function() {
             var year = this.dataset.year;
+            // 버튼 스타일 토글
             btns.forEach(function(b) {
-                b.classList.remove('bg-dark-900', 'text-white', 'border-dark-900');
-                b.classList.add('bg-white', 'text-dark-700', 'border-light-300');
+                b.classList.remove('bg-dark-900', 'text-white');
+                b.classList.add('bg-light-200', 'text-dark-700');
             });
-            this.classList.remove('bg-white', 'text-dark-700', 'border-light-300');
-            this.classList.add('bg-dark-900', 'text-white', 'border-dark-900');
+            this.classList.remove('bg-light-200', 'text-dark-700');
+            this.classList.add('bg-dark-900', 'text-white');
 
             var visible = 0;
             items.forEach(function(item) {

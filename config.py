@@ -103,7 +103,7 @@ class Config:
 
     # 페이지네이션 설정
     PAGINATION = {
-        'notice': 10,
+        'notice': 9,
         'activity': 12,
         'newsletter': 12,
     }

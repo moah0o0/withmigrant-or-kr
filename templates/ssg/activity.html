@@ -7,9 +7,17 @@
 {% block content %}
 <!-- Page Header -->
 <section class="w-full bg-white border-b border-light-300">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-14">
-        <h1 class="text-3xl sm:text-4xl font-black text-dark-900 tracking-tight mb-2">활동후기</h1>
-        <p class="text-sm text-dark-700 font-medium">활동가들이 직접 쓴 따끈따끈한 이야기들</p>
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-dark-900 tracking-tight mb-2">활동후기</h1>
+                <p class="text-xs sm:text-sm text-dark-700 font-medium">활동가들이 직접 쓴 따끈따끈한 이야기들</p>
+            </div>
+            <div class="relative w-full sm:w-64">
+                <input type="text" id="board-search" placeholder="제목 검색" class="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-light-300 rounded-xl bg-light-100 focus:bg-white focus:border-primary focus:outline-none transition-smooth" style="font-size:16px;">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -33,24 +41,28 @@
 <section class="w-full section-warm py-10 md:py-14">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
         {% if pagination.items %}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="board-grid">
             {% for post in pagination.items %}
-            <a href="/activity/{{ post.id }}.html" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden bg-white hover:border-primary/30 transition-smooth">
+            <a href="/activity/{{ post.id }}.html" data-title="{{ post.title }}" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden bg-white hover:border-primary/30 transition-smooth">
                 {% if post.image_url %}
                 <div class="aspect-[4/3] overflow-hidden bg-light-200">
-                    <img src="{{ post.image_url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <img src="{{ post.image_url }}" alt="{{ post.title }}" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                </div>
+                {% else %}
+                <div class="aspect-[4/3] overflow-hidden flex flex-col justify-center p-5 md:p-6 bg-white border-b border-light-300">
+                    <p class="text-sm sm:text-base font-bold text-dark-900 leading-snug line-clamp-3 mb-2" style="word-break:keep-all;">{{ post.title }}</p>
+                    {% if post.content %}
+                    <p class="text-[11px] sm:text-xs text-dark-500 font-medium line-clamp-3 leading-relaxed">{{ post.content | striptags | truncate(100) }}</p>
+                    {% endif %}
                 </div>
                 {% endif %}
-                <div class="flex flex-col gap-1.5 p-4 flex-1">
+                <div class="flex flex-col gap-1 p-3 sm:p-4">
                     {% if post.category %}
                     {% set cat_color = '#7c3aed' %}{% for c in categories %}{% if c.name == post.category %}{% set cat_color = c.color %}{% endif %}{% endfor %}
-                    <span class="text-xs font-bold" style="color:{{ cat_color }};">#{{ post.category }}</span>
+                    <span class="text-[10px] sm:text-xs font-bold" style="color:{{ cat_color }};">#{{ post.category }}</span>
                     {% endif %}
-                    <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth line-clamp-2 leading-snug">{{ post.title }}</h3>
-                    {% if not post.image_url and post.content %}
-                    <p class="text-xs text-dark-800 font-medium line-clamp-2 leading-relaxed">{{ post.content | striptags | truncate(80) }}</p>
-                    {% endif %}
-                    <p class="text-xs text-dark-700 font-medium mt-auto pt-2">{{ post.created_at.strftime('%Y.%m.%d') if post.created_at else '' }}</p>
+                    <h3 class="text-xs sm:text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ post.title }}</h3>
+                    <p class="text-[11px] sm:text-xs text-dark-500 font-medium mt-0.5">{{ post.created_at.strftime('%Y.%m.%d') if post.created_at else '' }}</p>
                 </div>
             </a>
             {% endfor %}
@@ -63,8 +75,14 @@
         {% endif %}
 
         <!-- Pagination -->
+        <!-- 검색 결과 없음 -->
+        <div id="board-empty" class="hidden text-center py-16">
+            <h3 class="text-sm font-bold text-dark-900 mb-1">검색 결과가 없습니다</h3>
+            <p class="text-xs text-dark-500">다른 키워드로 검색해 보세요</p>
+        </div>
+
         {% if pagination.pages > 1 %}
-        <div class="flex items-center justify-center gap-1 mt-10">
+        <div class="flex items-center justify-center gap-1 mt-10" id="board-pagination">
             {% if pagination.has_prev %}
             <a href="{% if current_category %}/activity/category/{{ current_category.replace(' ', '-') }}/{% if pagination.prev_num == 1 %}{% else %}page/{{ pagination.prev_num }}.html{% endif %}{% else %}{% if pagination.prev_num == 1 %}/activity/{% else %}/activity/page/{{ pagination.prev_num }}.html{% endif %}{% endif %}"
                class="w-10 h-10 flex items-center justify-center rounded-lg border border-light-300 bg-white text-dark-700 hover:border-dark-900 transition-smooth">
@@ -89,4 +107,29 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('board-search');
+    var cards = document.querySelectorAll('#board-grid > a');
+    var pagination = document.getElementById('board-pagination');
+    var emptyMsg = document.getElementById('board-empty');
+    if (!input || !cards.length) return;
+
+    input.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        var visible = 0;
+        cards.forEach(function(card) {
+            var title = (card.dataset.title || '').toLowerCase();
+            var show = !q || title.indexOf(q) !== -1;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        if (pagination) pagination.style.display = q ? 'none' : '';
+        if (emptyMsg) emptyMsg.classList.toggle('hidden', visible > 0 || !q);
+    });
+});
+</script>
 {% endblock %}

@@ -7,45 +7,63 @@
 {% block content %}
 <!-- Page Header -->
 <section class="w-full bg-white border-b border-light-300">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-14">
-        <h1 class="text-3xl sm:text-4xl font-black text-dark-900 tracking-tight mb-2">공지사항</h1>
-        <p class="text-sm text-dark-700 font-medium">{{ site.site_name or '양산외국인노동자의집' }}의 소식을 전합니다</p>
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-dark-900 tracking-tight mb-2">공지사항</h1>
+                <p class="text-xs sm:text-sm text-dark-700 font-medium">{{ site.site_name or '양산외국인노동자의집' }}의 소식을 전합니다</p>
+            </div>
+            <div class="relative w-full sm:w-64">
+                <input type="text" id="board-search" placeholder="제목 검색" class="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-light-300 rounded-xl bg-light-100 focus:bg-white focus:border-primary focus:outline-none transition-smooth" style="font-size:16px;">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- Main Content -->
-<section class="w-full section-warm py-10 md:py-14">
+<section class="w-full section-warm py-8 md:py-14">
     <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12">
         {% if pagination.items %}
         <!-- Pinned Notices -->
-        {% set pinned = pagination.items | selectattr('is_pinned') | list %}
+        {% set pinned = pagination.items | selectattr('notice') | selectattr('notice.is_pinned') | list %}
         {% if pinned and pagination.page == 1 %}
-        <div class="mb-6">
-            {% for notice in pinned %}
-            <a href="/notice/{{ notice.id }}.html"
-               class="group flex items-center gap-4 bg-white border-2 border-primary/20 hover:border-primary/40 rounded-xl p-4 sm:p-5 mb-3 transition-smooth">
-                <span class="flex-shrink-0 px-2.5 py-1 bg-primary text-white text-xs font-bold rounded-md">중요</span>
+        <div class="mb-6" id="board-pinned">
+            {% for item in pinned %}
+            <a href="/notice/{{ item.notice.id }}.html" data-title="{{ item.notice.title }}"
+               class="group flex items-center gap-3 sm:gap-4 bg-white border-2 border-primary/20 hover:border-primary/40 rounded-xl p-3 sm:p-5 mb-3 transition-smooth">
+                <span class="flex-shrink-0 px-2 py-0.5 sm:px-2.5 sm:py-1 bg-primary text-white text-[10px] sm:text-xs font-bold rounded-md">중요</span>
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ notice.title }}</h3>
+                    <h3 class="text-xs sm:text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ item.notice.title }}</h3>
                 </div>
-                <span class="text-xs text-dark-700 font-medium flex-shrink-0 hidden sm:block">{{ notice.created_at.strftime('%Y.%m.%d') if notice.created_at else '' }}</span>
+                <span class="text-[10px] sm:text-xs text-dark-700 font-medium flex-shrink-0 hidden sm:block">{{ item.notice.created_at.strftime('%Y.%m.%d') if item.notice.created_at else '' }}</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-dark-700 group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0"><path d="M9 6L15 12L9 18"/></svg>
             </a>
             {% endfor %}
         </div>
         {% endif %}
 
-        <!-- Notice List -->
-        <div class="bg-white rounded-xl border border-light-300 overflow-hidden">
-            {% for notice in pagination.items %}
-            {% if not notice.is_pinned or pagination.page != 1 %}
-            <a href="/notice/{{ notice.id }}.html"
-               class="group flex items-center gap-4 px-4 sm:px-5 py-4 hover:bg-light-100 transition-smooth {% if not loop.last %}border-b border-light-300{% endif %}">
-                {% if notice.is_pinned %}
-                <span class="flex-shrink-0 px-2 py-0.5 bg-primary text-white text-xs font-bold rounded">중요</span>
+        <!-- Card Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5" id="board-grid">
+            {% for item in pagination.items %}
+            {% if not item.notice.is_pinned or pagination.page != 1 %}
+            <a href="/notice/{{ item.notice.id }}.html" data-title="{{ item.notice.title }}" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden bg-white hover:border-primary/30 hover:shadow-md transition-all duration-300">
+                {% if item.image %}
+                <div class="aspect-[4/3] overflow-hidden bg-light-200">
+                    <img src="{{ item.image }}" alt="{{ item.notice.title }}" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                </div>
+                {% else %}
+                <div class="aspect-[4/3] overflow-hidden flex flex-col justify-center p-5 md:p-6 bg-white border-b border-light-300">
+                    <p class="text-sm sm:text-base font-bold text-dark-900 leading-snug line-clamp-3 mb-2" style="word-break:keep-all;">{{ item.notice.title }}</p>
+                    {% if item.notice.content %}
+                    <p class="text-[11px] sm:text-xs text-dark-500 font-medium line-clamp-3 leading-relaxed">{{ item.notice.content | striptags | truncate(100) }}</p>
+                    {% endif %}
+                </div>
                 {% endif %}
-                <h3 class="flex-1 min-w-0 text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth truncate">{{ notice.title }}</h3>
-                <span class="text-xs text-dark-700 font-medium flex-shrink-0">{{ notice.created_at.strftime('%Y.%m.%d') if notice.created_at else '' }}</span>
+                <div class="flex flex-col gap-1 p-3 sm:p-4">
+                    <h3 class="text-xs sm:text-sm font-bold text-dark-900 group-hover:text-primary transition-smooth line-clamp-2 leading-snug" style="word-break:keep-all;">{{ item.notice.title }}</h3>
+                    <p class="text-[11px] sm:text-xs text-dark-500 font-medium mt-1">{{ item.notice.created_at.strftime('%Y.%m.%d') if item.notice.created_at else '' }}</p>
+                </div>
             </a>
             {% endif %}
             {% endfor %}
@@ -59,7 +77,7 @@
 
         <!-- Pagination -->
         {% if pagination.pages > 1 %}
-        <div class="flex items-center justify-center gap-1 mt-10">
+        <div class="flex items-center justify-center gap-1 mt-10" id="board-pagination">
             {% if pagination.has_prev %}
             <a href="{% if pagination.prev_num == 1 %}/notice/{% else %}/notice/page/{{ pagination.prev_num }}.html{% endif %}"
                class="w-10 h-10 flex items-center justify-center rounded-lg border border-light-300 bg-white text-dark-700 hover:border-dark-900 transition-smooth">
@@ -82,6 +100,41 @@
             {% endif %}
         </div>
         {% endif %}
+        <!-- 검색 결과 없음 -->
+        <div id="board-empty" class="hidden text-center py-16">
+            <h3 class="text-sm font-bold text-dark-900 mb-1">검색 결과가 없습니다</h3>
+            <p class="text-xs text-dark-500">다른 키워드로 검색해 보세요</p>
+        </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('board-search');
+    var cards = document.querySelectorAll('#board-grid > a');
+    var pinnedItems = document.querySelectorAll('#board-pinned > a');
+    var pagination = document.getElementById('board-pagination');
+    var emptyMsg = document.getElementById('board-empty');
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        var visible = 0;
+        cards.forEach(function(card) {
+            var title = (card.dataset.title || '').toLowerCase();
+            var show = !q || title.indexOf(q) !== -1;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        pinnedItems.forEach(function(p) {
+            var title = (p.dataset.title || '').toLowerCase();
+            p.style.display = (!q || title.indexOf(q) !== -1) ? '' : 'none';
+        });
+        if (pagination) pagination.style.display = q ? 'none' : '';
+        if (emptyMsg) emptyMsg.classList.toggle('hidden', visible > 0 || !q);
+    });
+});
+</script>
 {% endblock %}

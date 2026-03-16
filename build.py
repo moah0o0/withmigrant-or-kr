@@ -163,6 +163,14 @@ def normalize_seo(seo):
     return normalized
 
 
+def extract_first_image(html_content):
+    """HTML 콘텐츠에서 첫 번째 이미지 URL 추출"""
+    if not html_content:
+        return None
+    match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', html_content)
+    return match.group(1) if match else None
+
+
 def build_index(app):
     """메인 페이지 빌드"""
     with app.app_context():
@@ -173,14 +181,14 @@ def build_index(app):
             .order_by(ActivityPhoto.display_order).limit(5).all()
         business_areas = BusinessArea.query.filter_by(is_active=True)\
             .order_by(BusinessArea.display_order).all()
-        notices = Notice.query.order_by(Notice.is_pinned.desc(), Notice.created_at.desc()).limit(5).all()
-        activities = ActivityPost.query.order_by(ActivityPost.created_at.desc()).limit(6).all()
+        notices = Notice.query.order_by(Notice.is_pinned.desc(), Notice.created_at.desc()).limit(6).all()
         newsletters = Newsletter.query.order_by(Newsletter.published_at.desc()).limit(4).all()
-        sponsorship = SponsorshipInfo.query.first()
-        volunteer_areas = VolunteerArea.query.filter_by(is_active=True)\
-            .order_by(VolunteerArea.display_order).all()
-        donation_areas = DonationArea.query.filter_by(is_active=True)\
-            .order_by(DonationArea.display_order).all()
+
+        # 공지 카드 데이터 (이미지 추출 포함)
+        notice_cards = []
+        for notice in notices:
+            img = extract_first_image(notice.content)
+            notice_cards.append({'notice': notice, 'image': img})
 
         # SEO 설정
         seo = normalize_seo({**Config.SEO_DEFAULTS, **Config.SEO_PAGES.get('index', {})})
@@ -189,12 +197,8 @@ def build_index(app):
             **ctx,
             hero_photos=hero_photos,
             business_areas=business_areas,
-            notices=notices,
-            activities=activities,
+            notice_cards=notice_cards,
             newsletters=newsletters,
-            sponsorship=sponsorship,
-            volunteer_areas=volunteer_areas,
-            donation_areas=donation_areas,
             seo=seo,
             current_page='index'
         )
@@ -255,9 +259,14 @@ def build_notice_list(app):
             notices = Notice.query.order_by(Notice.is_pinned.desc(), Notice.created_at.desc())\
                 .offset((page - 1) * per_page).limit(per_page).all()
 
-            # 간단한 페이지네이션 객체 생성 (SimpleNamespace 사용)
+            # 공지 카드 데이터 (이미지 추출 포함)
+            notice_cards = []
+            for notice in notices:
+                img = extract_first_image(notice.content)
+                notice_cards.append({'notice': notice, 'image': img})
+
             pagination = SimpleNamespace(
-                items=notices,
+                items=notice_cards,
                 page=page,
                 pages=total_pages,
                 total=total,
@@ -674,6 +683,43 @@ def build_cf_headers():
     print("  ✓ _headers (Cloudflare Pages)")
 
 
+def build_search_index(app):
+    """검색 인덱스 JSON 생성"""
+    import json
+    with app.app_context():
+        items = []
+
+        for n in Notice.query.order_by(Notice.created_at.desc()).all():
+            items.append({
+                't': n.title,
+                'u': f'/notice/{n.id}.html',
+                'd': n.created_at.strftime('%Y.%m.%d') if n.created_at else '',
+                'c': '공지',
+            })
+
+        for p in ActivityPost.query.order_by(ActivityPost.created_at.desc()).all():
+            items.append({
+                't': p.title,
+                'u': f'/activity/{p.id}.html',
+                'd': p.created_at.strftime('%Y.%m.%d') if p.created_at else '',
+                'c': p.category or '활동',
+            })
+
+        for nl in Newsletter.query.order_by(Newsletter.published_at.desc()).all():
+            items.append({
+                't': nl.title,
+                'u': f'/newsletter/{nl.id}.html',
+                'd': nl.published_at.strftime('%Y.%m.%d') if nl.published_at else '',
+                'c': '소식지',
+            })
+
+        index_path = os.path.join(Config.DIST_DIR, 'search-index.json')
+        with open(index_path, 'w', encoding='utf-8') as f:
+            json.dump(items, f, ensure_ascii=False)
+
+        print(f"  ✓ search-index.json ({len(items)}건)")
+
+
 def main():
     parser = argparse.ArgumentParser(description='SSG 빌드 스크립트')
     parser.add_argument('--clean', action='store_true', help='dist 폴더 초기화 후 빌드')
@@ -718,6 +764,7 @@ def main():
 
     # SEO 파일 생성
     print("\n[3/3] SEO 및 배포 파일 생성")
+    build_search_index(app)
     build_sitemap(app)
     build_robots_txt()
     build_cf_headers()

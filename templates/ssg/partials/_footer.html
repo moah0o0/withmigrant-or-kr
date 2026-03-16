@@ -1,17 +1,17 @@
 <!-- Footer -->
 <footer class="w-full bg-white" style="border-top:1px solid #e5e5e5;">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-10 md:py-12">
-        <div class="flex flex-col gap-6">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-12">
+        <div class="flex flex-col gap-5">
             <!-- Organization Info -->
-            <div class="flex flex-col gap-3">
-                <h3 class="text-sm font-bold text-dark-900">
+            <div class="flex flex-col gap-2">
+                <h3 class="text-xs sm:text-sm font-bold text-dark-900">
                     {{ site.org_name or '사단법인 함께하는세상' }}
                 </h3>
-                <ul class="flex flex-col gap-1 text-xs font-medium text-dark-700">
+                <ul class="flex flex-col gap-0.5 text-[11px] sm:text-xs font-medium text-dark-700 leading-relaxed">
                     <li>대표 : {{ site.representative or '김덕한' }}</li>
-                    <li class="break-all">주소 : {{ site.address or '경상남도 양산시 북안북7길35 양산시근로자종합복지관 1층, 사단법인 함께하는세상' }}</li>
+                    <li style="word-break:keep-all;">주소 : {{ site.address or '경상남도 양산시 북안북7길35 양산시근로자종합복지관 1층, 사단법인 함께하는세상' }}</li>
                     <li>Tel : {{ site.tel or '055-388-0988' }} / Fax : {{ site.fax or '055-366-0988' }}</li>
-                    <li class="break-all">Email : {{ site.email or 'happysoli@hanmail.net' }}</li>
+                    <li>Email : {{ site.email or 'happysoli@hanmail.net' }}</li>
                 </ul>
             </div>
 

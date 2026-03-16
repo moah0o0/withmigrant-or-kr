@@ -28,7 +28,7 @@
 <!-- Article Body -->
 <section class="w-full section-warm py-10 md:py-14">
     <div class="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white rounded-xl border border-light-300 p-5 sm:p-8 md:p-10">
+        <div class="bg-white rounded-xl border border-light-300 p-4 sm:p-8 md:p-10">
             <div class="prose-content">{{ post.content | fix_upload_urls | safe }}</div>
         </div>
 
@@ -75,7 +75,7 @@
             <a href="/activity/{{ related.id }}.html" class="group flex flex-col border border-light-300 rounded-xl overflow-hidden hover:border-primary/30 transition-smooth">
                 {% if related.image_url %}
                 <div class="aspect-[4/3] overflow-hidden bg-light-200">
-                    <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <img src="{{ related.image_url }}" alt="{{ related.title }}" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
                 </div>
                 {% endif %}
                 <div class="flex flex-col gap-1.5 p-4 flex-1">
